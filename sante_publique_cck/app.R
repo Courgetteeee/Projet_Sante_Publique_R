@@ -13,6 +13,9 @@ library(shiny)
 #Clara et Cindy c'est le squelette de l'app shiny
 
 
+
+#ABCDEFGHIJKLMNOPQRSTUVWXYZ
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
