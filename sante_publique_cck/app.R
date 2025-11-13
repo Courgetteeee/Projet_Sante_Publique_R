@@ -11,6 +11,7 @@ library(shiny)
 
 
 #Clara et Cindy c'est le squelette de l'app shiny
+# ok karla merci
 
 
 # Define UI for application that draws a histogram
