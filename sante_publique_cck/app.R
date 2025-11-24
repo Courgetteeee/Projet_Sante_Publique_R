@@ -10,12 +10,10 @@
 library(shiny)
 
 
-#Clara et Cindy c'est le squelette de l'app shiny
-# ok karla merci
+#Import et prétraitement des données 
 
+mort_dipl <- read.table(file = "MORTA_DIP.xsl", header =TRUE)
 
-
-#ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
