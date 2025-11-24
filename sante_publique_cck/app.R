@@ -158,14 +158,11 @@ mortalite_perinatale <- mortalite_perinatale_comb %>% select(-variable)
 
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- navbarPage(
+  "Santé publique sur le territoire",
 
-    # Application title
-    titlePanel("Santé publique sur le territoire"),
-
-    
-    #UI de Clara
-    
+  #UI de Clara
+  tabPanel("Page de Clara, modifie ton titre comme tu veux",
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
@@ -185,8 +182,53 @@ ui <- fluidPage(
           )
         )
       )
+    ),
+  tabPanel("Page de Karla titre a modifier",
+    # Sidebar with a slider input for number of bins 
+    sidebarLayout(
+     sidebarPanel(
+       selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
+                   selected=medecin_long$departement[1]),
+       selectInput(inputId="specialites", label="Choisir une spécialités :", choices=medecin_long$specialites, 
+                   selected=medecin_long$specialites[1]),
+       downloadLink('downloadData', 'Download')
+     ),
+     
+     # Show a plot of the generated distribution
+     mainPanel(
+       tabsetPanel(
+         tabPanel("Evolution des effectifs",
+                  plotOutput("effectifs_medecin")
+         ),
+       )
+     )
     )
+  ),
 
+
+tabPanel("Page de Cindy Modifie ton titre comme tu veux",
+         # Sidebar with a slider input for number of bins 
+         sidebarLayout(
+           sidebarPanel(
+             selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
+                         selected=medecin_long$departement[1]),
+             selectInput(inputId="specialites", label="Choisir une spécialités :", choices=medecin_long$specialites, 
+                         selected=medecin_long$specialites[1]),
+             downloadLink('downloadData', 'Download')
+           ),
+           
+           # Show a plot of the generated distribution
+           mainPanel(
+             tabsetPanel(
+               tabPanel("Evolution des effectifs",
+                        plotOutput("effectifs_medecin")
+               ),
+             )
+           )
+         )
+)
+
+)
 # ---------------------------- SERVER -----------------------------------
 
 # Define server logic required to draw a histogram
@@ -211,6 +253,10 @@ server <- function(input, output) {
         ggtitle("Évolution des effectifs") +
         theme_bw()
     })
+    
+    #Server de Karla
+    
+    #Server de Cindy
 }
 
 # ---------------------------- GLOBAL -----------------------------------
