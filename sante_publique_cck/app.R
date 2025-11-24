@@ -10,27 +10,19 @@
 # Les packages
 
 library(shiny)
-<<<<<<< HEAD
 library(readxl)
 library(dplyr)
 library(tidyr)
 library(purrr)
 library(stringr)
-=======
 library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(readxl)
->>>>>>> ce0fad9481fc9509bb0a6befe22078d77e26cfe5
+
 
 # Importation des données
 
-<<<<<<< HEAD
-#Import et prétraitement des données de Karla
-=======
 medecin<-read_excel("../data/Med_2012_2025.xlsx", sheet=2)
 
-# Traitement des données
+# Traitement des données de Clara
 
 medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3")), region != "00-Ensemble", 
                                     sexe=="0-Ensemble", departement!="000-Ensemble", exercice == "0-Ensemble",
@@ -39,8 +31,9 @@ medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3"))
 medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
   names_to = "annee", values_to = "effectif") %>% 
   mutate(annee=as.integer(sub("effectif_", "", annee)))
->>>>>>> ce0fad9481fc9509bb0a6befe22078d77e26cfe5
 
+
+#Import et prétraitement des données de Karla
 
 import_sheet <- function(file, sheet_name) {
   
