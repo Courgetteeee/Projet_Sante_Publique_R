@@ -183,52 +183,34 @@ ui <- navbarPage(
         )
       )
     ),
-  tabPanel("Page de Karla titre a modifier",
-    # Sidebar with a slider input for number of bins 
-    sidebarLayout(
-     sidebarPanel(
-       selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
-                   selected=medecin_long$departement[1]),
-       selectInput(inputId="specialites", label="Choisir une spécialités :", choices=medecin_long$specialites, 
-                   selected=medecin_long$specialites[1]),
-       downloadLink('downloadData', 'Download')
-     ),
-     
-     # Show a plot of the generated distribution
-     mainPanel(
-       tabsetPanel(
-         tabPanel("Evolution des effectifs",
-                  plotOutput("effectifs_medecin")
-         ),
-       )
-     )
-    )
+  tabPanel("Page de Karla Modifie ton titre comme tu veux",
+           # Sidebar with a slider input for number of bins 
+           sidebarLayout(
+             sidebarPanel(
+             
+              ),
+             mainPanel(
+               
+             ),
+             
+           )
   ),
 
 
 tabPanel("Page de Cindy Modifie ton titre comme tu veux",
          # Sidebar with a slider input for number of bins 
          sidebarLayout(
-           sidebarPanel(
-             selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
-                         selected=medecin_long$departement[1]),
-             selectInput(inputId="specialites", label="Choisir une spécialités :", choices=medecin_long$specialites, 
-                         selected=medecin_long$specialites[1]),
-             downloadLink('downloadData', 'Download')
-           ),
-           
-           # Show a plot of the generated distribution
-           mainPanel(
-             tabsetPanel(
-               tabPanel("Evolution des effectifs",
-                        plotOutput("effectifs_medecin")
-               ),
-             )
-           )
-         )
+            sidebarPanel(
+              
+            ),
+            mainPanel(
+              
+            ),
+
+          ),
+        )
 )
 
-)
 # ---------------------------- SERVER -----------------------------------
 
 # Define server logic required to draw a histogram
