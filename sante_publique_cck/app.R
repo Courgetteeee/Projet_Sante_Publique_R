@@ -12,21 +12,18 @@
 library(shiny)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(readxl)
 
 # Importation des données
 
-df<-read_excel("../data/Inf_lib_2012_2023.xlsx", sheet=2)
-df
+medecin<-read_excel("../data/Med_2012_2025.xlsx", sheet=2)
 
 # Traitement des données
-
-medecin<-read_excel("data/Med_2012_2025.xlsx", sheet=2)
 
 medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3")), region != "00-Ensemble", 
                                     sexe=="0-Ensemble", departement!="000-Ensemble", exercice == "0-Ensemble",
                                     tranche_age=="00-Ensemble", specialites != "00-Ensemble")
-
 
 medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
   names_to = "annee", values_to = "effectif") %>% 
@@ -41,7 +38,7 @@ medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Old Faithful Geyser Data"),
+    titlePanel("Santé publique sur le territoire"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -61,23 +58,29 @@ ui <- fluidPage(
             ),
           )
         )
+      )
     )
-)
 
 # ---------------------------- SERVER -----------------------------------
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  # Affiche le bouton de téléchargement
+    output$downloadData <- downloadHandler(filename = function(){
+      paste('data-', Sys.Date(), '.csv', sep='')}, 
+      content = function(con){
+        write.csv(data, con)})
 
-    output$distPlot <- renderPlot({
-        # generate bins based on input$bins from ui.R
-        x    <- faithful[, 2]
-        bins <- seq(min(x), max(x), length.out = input$bins + 1)
-
-        # draw the histogram with the specified number of bins
-        hist(x, breaks = bins, col = 'darkgray', border = 'white',
-             xlab = 'Waiting time to next eruption (in mins)',
-             main = 'Histogram of waiting times')
+    output$effectifs_medecin <- renderPlot({
+      medecin_long %>% filter(departement==input$departement, specialites==input$specialites) %>% 
+      ggplot(aes(x=annee, y=effectif)) +
+        geom_line(color="steelblue", size=1.5) +
+        geom_point(color="steelblue", size=3) +
+        xlab("Année") +
+        ylab("Effectif") +
+        ggtitle("Évolution des effectifs") +
+        theme_bw()
     })
 }
 
