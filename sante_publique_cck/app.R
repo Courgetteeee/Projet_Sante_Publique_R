@@ -104,7 +104,7 @@ morta_cs <- morta_cs %>% filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge
 # Lecture des 2 premières lignes pour récupérer les variables et le sexe
 headers <- read_excel("../donnees_shiny/FET2021-28.xlsx", n_max = 2, col_names = FALSE)
 header1 <- headers[1, ] %>% unlist()  # noms des variables
-header1<- zoo::na.locf(header1)
+header1 <- fill(data.frame(header1), header1)$header1
 
 sexe_code <- headers[2, ] %>% unlist() # H ou F
 
@@ -115,7 +115,7 @@ dat <- read_excel("../donnees_shiny/FET2021-28.xlsx", skip = 2, col_names = FALS
 colnames_unique <- paste0(header1, "_", sexe_code)
 colnames_unique<- c("Région", colnames_unique)
 
-# On commence par renommer les colonnes avec ta liste unique
+#On renomme nos entêtes
 colnames(dat) <- colnames_unique
 
 cols_to_pivot <- grep("_(Femmes|Hommes)$", colnames(dat), value = TRUE)
@@ -137,7 +137,7 @@ col_tous <- "Mortalité périnatale pour 1 000 naissances_Ensemble"
 
 # Pivot pour mortalite_ensemble avec sexe = "Tous"
 mortalite_perinatale_comb <- dat %>%
-  select(-all_of(cols_to_pivot)) %>%   # enlever colonnes Homme/Femme pour éviter doublons
+  select(-all_of(cols_to_pivot)) %>%
   pivot_longer(
     cols = all_of(col_tous),
     names_to = "variable_sexe",
@@ -149,6 +149,7 @@ mortalite_perinatale_comb <- dat %>%
 
 # Combine les deux
 mortalite_combine <- bind_rows(mortalite_cause, mortalite_perinatale_comb) %>% select(-variable_sexe)
+#Table a part pour mortalité périnatale
 mortalite_perinatale <- mortalite_perinatale_comb %>% select(-variable)
 
 
@@ -162,6 +163,9 @@ ui <- fluidPage(
     # Application title
     titlePanel("Santé publique sur le territoire"),
 
+    
+    #UI de Clara
+    
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
@@ -187,6 +191,9 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  
+  #Server de Clara
   
   # Affiche le bouton de téléchargement
     output$downloadData <- downloadHandler(filename = function(){
