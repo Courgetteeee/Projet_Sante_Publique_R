@@ -17,7 +17,6 @@ library(purrr)
 library(stringr)
 library(ggplot2)
 
-
 # Importation des données
 
 medecin<-read_excel("../data/Med_2012_2025.xlsx", sheet=2)
@@ -152,6 +151,8 @@ mortalite_combine <- bind_rows(mortalite_cause, mortalite_perinatale_comb) %>% s
 #Table a part pour mortalité périnatale
 mortalite_perinatale <- mortalite_perinatale_comb %>% select(-variable)
 
+mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
+
 
 
 # ---------------------------- UI -----------------------------------
@@ -163,7 +164,6 @@ ui <- navbarPage(
 
   #UI de Clara
   tabPanel("Page de Clara, modifie ton titre comme tu veux",
-    # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
           selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
@@ -185,15 +185,15 @@ ui <- navbarPage(
     ),
   tabPanel("Page de Karla Modifie ton titre comme tu veux",
            # Sidebar with a slider input for number of bins 
-           sidebarLayout(
-             sidebarPanel(
-             
-              ),
              mainPanel(
+               tabsetPanel(
+                 tabPanel("Mortalité Périnatale",
+                          plotOutput("mortalite_peri_reg")
+                 ),
+               )
                
              ),
              
-           )
   ),
 
 
@@ -204,6 +204,7 @@ tabPanel("Page de Cindy Modifie ton titre comme tu veux",
               
             ),
             mainPanel(
+              
               
             ),
 
@@ -237,6 +238,17 @@ server <- function(input, output) {
     })
     
     #Server de Karla
+    
+    #Graphe mortalité périnatale
+    output$mortalite_peri_reg<- renderPlot({
+      ggplot(mortalite_perinatale) +
+        aes(x = Région, y = valeur) +
+        geom_col(fill = "#AF0D0D") +
+        labs(y = "mortalité", 
+             title = "Mortalité périnatale sur 1000 naissances") +
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 45L, hjust=1))
+    })
     
     #Server de Cindy
 }
