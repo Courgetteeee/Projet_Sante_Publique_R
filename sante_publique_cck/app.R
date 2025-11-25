@@ -8,28 +8,17 @@
 #
 
 # Les packages
-
-library(shiny)
-library(readxl)
 library(dplyr)
-library(tidyr)
-library(purrr)
-library(stringr)
 library(ggplot2)
+library(purrr)
+library(readxl)
+library(shiny)
+library(stringr)
+library(tidyr)
 
-# Importation des données
 
-medecin<-read_excel("../data/Med_2012_2025.xlsx", sheet=2)
-
-# Traitement des données de Clara
-
-medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3")), region != "00-Ensemble", 
-                                    sexe=="0-Ensemble", departement!="000-Ensemble", exercice == "0-Ensemble",
-                                    tranche_age=="00-Ensemble", specialites != "00-Ensemble")
-
-medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
-  names_to = "annee", values_to = "effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee)))
+# Import tables Clara
+medecin_long <- readRDS("../donnees_traitees/medecin_long.rds")
 
 
 # Import tables Karla : 
@@ -38,9 +27,6 @@ morta_dip<-readRDS("../donnees_traitees/morta_dip.rds")
 mortalite_cause<-readRDS("../donnees_traitees/mortalite_cause.rds")
 mortalite_combine<-readRDS("../donnees_traitees/mortalite_combine.rds")
 mortalite_perinatale<-readRDS("../donnees_traitees/mortalite_perinatale.rds")
-
-mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
-
 
 
 # ---------------------------- UI -----------------------------------
@@ -129,6 +115,7 @@ server <- function(input, output) {
     
     #Graphe mortalité périnatale
     output$mortalite_peri_reg<- renderPlot({
+      mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
       ggplot(mortalite_perinatale) +
         aes(x = Région, y = valeur) +
         geom_col(fill = "#AF0D0D") +
