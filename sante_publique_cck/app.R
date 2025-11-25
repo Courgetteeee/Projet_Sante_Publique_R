@@ -57,34 +57,46 @@ ui <- navbarPage(
         )
       )
     ),
-  tabPanel("Études autour de la mortalité",
-           # Sidebar with a slider input for number of bins 
-             mainPanel(
-               tabsetPanel(
-                 tabPanel("Mortalité Périnatale",
-                          plotOutput("mortalite_peri_reg")
-                 ),
-               )
-               
-             ),
+  tabPanel("Études de la mortalité sur le territoire",
+           
+    tabsetPanel(
              
+     tabPanel("Mortalité Périnatale",
+        fluidPage(
+          plotOutput("mortalite_peri_reg")
+        )
+     ),
+             
+       tabPanel("Mortalité et causes par région",
+                sidebarLayout(
+                  sidebarPanel(
+                    selectInput(inputId="Cause", label="Choisir la cause du décès :", 
+                                choices=mortalite_cause$variable),
+                  ),
+                  mainPanel(
+                    plotOutput("mortalite_cause_bar")
+                  )
+                )
+       )
+             
+    )
   ),
 
 
-tabPanel("Page de Cindy Modifie ton titre comme tu veux",
-         # Sidebar with a slider input for number of bins 
-         sidebarLayout(
-            sidebarPanel(
-              
+  tabPanel("Page de Cindy Modifie ton titre comme tu veux",
+           # Sidebar with a slider input for number of bins 
+           sidebarLayout(
+              sidebarPanel(
+                
+              ),
+              mainPanel(
+                
+                
+              ),
+  
             ),
-            mainPanel(
-              
-              
-            ),
-
-          ),
-        )
-)
+          )
+  )
 
 # ---------------------------- SERVER -----------------------------------
 
@@ -123,6 +135,18 @@ server <- function(input, output) {
              title = "Mortalité périnatale sur 1000 naissances") +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45L, hjust=1))
+    })
+    
+    #Graphe cause mortalité
+    output$mortalite_cause_bar <- renderPlot({
+      mortalite_cause%>% filter(variable==input$Cause) %>%
+      ggplot(aes(x = Région, y = valeur)) +
+        geom_col(fill = "#ACA3C8") +
+        facet_wrap(~sexe)+
+        labs(y = "taux de mortalité", 
+             title = "Taux de mortalité standardisé pour 100 000 habitants selon la région") +
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 45L, hjust = 1L))
     })
     
     #Server de Cindy
