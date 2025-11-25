@@ -71,7 +71,7 @@ ui <- navbarPage(
         )
       )
     ),
-  tabPanel("Page de Karla Modifie ton titre comme tu veux",
+  tabPanel("Études autour de la mortalité",
            # Sidebar with a slider input for number of bins 
              mainPanel(
                tabsetPanel(

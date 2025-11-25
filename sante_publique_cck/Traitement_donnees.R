@@ -6,8 +6,25 @@ library(stringr)
 library(tidyr)
 
 
+## Import et prétraitement des données de Clara --------------------------------
 
-#Import et prétraitement des données de Karla
+medecin<-read_excel("data/Med_2012_2025.xlsx", sheet=2)
+
+
+medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3")), region != "00-Ensemble", 
+                                    sexe=="0-Ensemble", departement!="000-Ensemble", exercice == "0-Ensemble",
+                                    tranche_age=="00-Ensemble", specialites != "00-Ensemble")
+
+medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
+                                               names_to = "annee", values_to = "effectif") %>% 
+  mutate(annee=as.integer(sub("effectif_", "", annee)))
+
+
+saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
+
+
+
+## Import et prétraitement des données de Karla --------------------------------
 
 import_sheet <- function(file, sheet_name) {
   
@@ -134,3 +151,5 @@ saveRDS(mortalite_cause, "donnees_traitees/mortalite_cause.rds")
 saveRDS(morta_dip, "donnees_traitees/morta_dip.rds")
 saveRDS(morta_cs, "donnees_traitees/morta_cs.rds")
 
+
+##Import et prétraitement des données de Cindy ---------------------------------
