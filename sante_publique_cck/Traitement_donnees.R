@@ -118,7 +118,7 @@ mortalite_cause <- dat %>%
     values_to = "valeur"
   ) %>%
   mutate(
-    sexe = if_else(str_ends(variable_sexe, "Femme"), "Femme", "Homme"),
+    sexe = if_else(str_ends(variable_sexe, "Femmes"), "Femme", "Homme"),
     variable = str_remove(variable_sexe, "_Femmes$|_Hommes$")
   ) %>%
   select(Région, valeur, sexe, variable)
