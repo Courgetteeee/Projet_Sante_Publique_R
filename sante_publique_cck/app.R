@@ -57,6 +57,8 @@ ui <- navbarPage(
         )
       )
     ),
+  
+  #UI de Karla
   tabPanel("Études de la mortalité sur le territoire",
            
     tabsetPanel(
@@ -67,17 +69,30 @@ ui <- navbarPage(
         )
      ),
              
-       tabPanel("Mortalité et causes par région",
-                sidebarLayout(
-                  sidebarPanel(
-                    selectInput(inputId="Cause", label="Choisir la cause du décès :", 
-                                choices=mortalite_cause$variable),
-                  ),
-                  mainPanel(
-                    plotOutput("mortalite_cause_bar")
-                  )
+     tabPanel("Mortalité et causes par région",
+              sidebarLayout(
+                sidebarPanel(
+                  selectInput(inputId="Cause", label="Choisir la cause du décès :", 
+                              choices=mortalite_cause$variable),
+                ),
+                mainPanel(
+                  plotOutput("mortalite_cause_bar")
                 )
-       )
+              )
+     ),
+     tabPanel("Indicateur de mortalité selon le diplôme ",
+              sidebarLayout(
+                sidebarPanel(
+                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenté :", 
+                              choices=morta_dip$indicateur),
+                  selectInput(inputId="Annees", label="Années :", 
+                              choices=morta_dip$int_annee),
+                ),
+                mainPanel(
+                  plotOutput("mortalite_diplome")
+                )
+              )
+     )
              
     )
   ),
@@ -149,6 +164,22 @@ server <- function(input, output) {
              title = "Taux de mortalité standardisé pour 100 000 habitants selon la région") +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45L, hjust = 1L))
+    })
+    
+    #Graphe mortalité diplome
+    output$mortalite_diplome <- renderPlot({
+      morta_dip %>%
+        filter(int_annee %in% input$Annee) %>%
+        filter(indicateur %in% input$Indicateur) %>%
+        ggplot() +
+        aes(x = age, y = valeur_dip, colour = diplome) +
+        geom_line() +
+        scale_color_hue(direction = 1) +
+        labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et du diplome", 
+             color = "Diplôme") +
+        #facet_wrap(~sexe)+
+        theme_minimal()
+
     })
     
     #Server de Cindy
