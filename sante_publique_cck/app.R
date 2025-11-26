@@ -115,7 +115,7 @@ server <- function(input, output) {
     output$effectifs_medecin <- renderPlot({
       medecin_long %>% filter(departement==input$departement, specialites==input$specialites) %>% 
       ggplot(aes(x=annee, y=effectif)) +
-        geom_line(color="steelblue", size=1.5) +
+        geom_line(color="steelblue", linewidth=1.5) +
         geom_point(color="steelblue", size=3) +
         xlab("Année") +
         ylab("Effectif") +
@@ -128,9 +128,11 @@ server <- function(input, output) {
     #Graphe mortalité périnatale
     output$mortalite_peri_reg<- renderPlot({
       mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
+      
       ggplot(mortalite_perinatale) +
         aes(x = Région, y = valeur) +
-        geom_col(fill = "#AF0D0D") +
+        geom_segment( aes(x=Région, xend=Région, y=0, yend=valeur), color="grey") +
+        geom_point(color="darkorchid3", size = 2)+
         labs(y = "mortalité", 
              title = "Mortalité périnatale sur 1000 naissances") +
         theme_bw() +
