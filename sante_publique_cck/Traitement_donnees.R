@@ -60,11 +60,6 @@ import_sheet <- function(file, sheet_name) {
   sexe_code  <- parts[2]              # H ou F
   annees     <- parts[3]              # 2009_2013
   
-  deb_fin <- unlist(str_split(annees, "_"))
-  
-  annee_debut <- as.numeric(deb_fin[1])
-  annee_fin   <- as.numeric(deb_fin[2])
-  
   dat <- dat %>%
     mutate(
       sexe = case_when(
@@ -72,8 +67,8 @@ import_sheet <- function(file, sheet_name) {
         sexe_code == "F" ~ "Femme",
         TRUE ~ sexe_code
       ),
-      annee_debut = annee_debut,
-      annee_fin = annee_fin
+      int_annee = annees
+
     )
   
   dat
@@ -90,6 +85,24 @@ morta_dip <- morta_dip %>% filter(Diplme_INDICATEUR != "Âge") %>% rename(age = 
 
 morta_cs <- import_all_sheets("donnees_shiny/MORTA_CS.xlsx")
 morta_cs <- morta_cs %>% filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>% rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
+
+morta_dip <- morta_dip %>%
+  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>% 
+  pivot_longer(cols = -c(int_annee, sexe, age),
+               names_to = c("diplome", "indicateur"),
+               names_sep = "_",
+               values_to = "valeur_dip") %>% 
+  mutate(age = as.numeric(age))
+
+
+morta_cs <- morta_cs %>%
+  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>% 
+  pivot_longer(cols = -c(int_annee, sexe, age),
+               names_to = c("classe_sociale", "indicateur"),
+               names_sep = "_",
+               values_to = "valeur_cs") %>%
+  mutate(age = as.numeric(age))
+
 
 
 # Lecture des 2 premières lignes pour récupérer les variables et le sexe
