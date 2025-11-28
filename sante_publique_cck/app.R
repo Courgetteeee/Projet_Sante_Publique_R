@@ -92,6 +92,19 @@ ui <- navbarPage(
                   plotOutput("mortalite_diplome")
                 )
               )
+     ),      
+     tabPanel("Indicateur de mortalité selon le diplôme ",
+              sidebarLayout(
+                sidebarPanel(
+                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenté :", 
+                              choices=morta_dip$indicateur),
+                  selectInput(inputId="Annees", label="Années :", 
+                              choices=morta_dip$int_annee),
+                ),
+                mainPanel(
+                  plotOutput("mortalite_diplome")
+                )
+              )
      )
              
     )
@@ -169,15 +182,15 @@ server <- function(input, output) {
     #Graphe mortalité diplome
     output$mortalite_diplome <- renderPlot({
       morta_dip %>%
-        filter(int_annee %in% input$Annee) %>%
-        filter(indicateur %in% input$Indicateur) %>%
+        filter(int_annee == input$Annees) %>%
+        filter(indicateur == input$Indicateur) %>%
         ggplot() +
         aes(x = age, y = valeur_dip, colour = diplome) +
         geom_line() +
         scale_color_hue(direction = 1) +
         labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et du diplome", 
              color = "Diplôme") +
-        #facet_wrap(~sexe)+
+        facet_wrap(~sexe)+
         theme_minimal()
 
     })

@@ -92,7 +92,11 @@ morta_dip <- morta_dip %>%
                names_to = c("diplome", "indicateur"),
                names_sep = "_",
                values_to = "valeur_dip") %>% 
-  mutate(age = as.numeric(age))
+  mutate(age = as.numeric(age)) %>% 
+  mutate(indicateur = recode(indicateur,
+                             "Quotientdemortalitpour100000"="Quotient de mortalité pour 10000" , 
+                             "Survielgex"="Survie à âge x",
+                             "Esprancedevielgex"="Esperance de vie à âge x"))
 
 
 morta_cs <- morta_cs %>%
@@ -101,7 +105,11 @@ morta_cs <- morta_cs %>%
                names_to = c("classe_sociale", "indicateur"),
                names_sep = "_",
                values_to = "valeur_cs") %>%
-  mutate(age = as.numeric(age))
+  mutate(age = as.numeric(age)) %>%   
+  mutate(indicateur = recode(indicateur,
+                             "Quotientdemortalitpour100000"="Quotient de mortalité pour 10000" , 
+                             "Survielgex"="Survie à âge x",
+                             "Esprancedevielgex"="Esperance de vie à âge x"))
 
 
 
