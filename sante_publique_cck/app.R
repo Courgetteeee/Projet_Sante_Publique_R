@@ -11,6 +11,7 @@
 library(dplyr)
 library(ggplot2)
 library(purrr)
+library(RColorBrewer)
 library(readxl)
 library(shiny)
 library(stringr)
@@ -83,7 +84,7 @@ ui <- navbarPage(
      tabPanel("Indicateur de mortalité selon le diplôme ",
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenté :", 
+                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenter :", 
                               choices=morta_dip$indicateur),
                   selectInput(inputId="Annees", label="Années :", 
                               choices=morta_dip$int_annee),
@@ -93,16 +94,16 @@ ui <- navbarPage(
                 )
               )
      ),      
-     tabPanel("Indicateur de mortalité selon le diplôme ",
+     tabPanel("Indicateur de mortalité selon la classe sociale ",
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenté :", 
-                              choices=morta_dip$indicateur),
-                  selectInput(inputId="Annees", label="Années :", 
-                              choices=morta_dip$int_annee),
+                  selectInput(inputId="Indicateur_cs", label="Choisir l'indicateur a représenter :", 
+                              choices=morta_cs$indicateur),
+                  selectInput(inputId="Annees_cs", label="Années :", 
+                              choices=morta_cs$int_annee),
                 ),
                 mainPanel(
-                  plotOutput("mortalite_diplome")
+                  plotOutput("mortalite_classe")
                 )
               )
      )
@@ -193,6 +194,22 @@ server <- function(input, output) {
         facet_wrap(~sexe)+
         theme_minimal()
 
+    })
+    
+    #Graphe mortalité classe sociale
+    output$mortalite_classe <- renderPlot({
+      morta_cs %>%
+        filter(int_annee == input$Annees_cs) %>%
+        filter(indicateur == input$Indicateur_cs) %>%
+        ggplot() +
+        aes(x = age, y = valeur_cs, colour = classe_social) +
+        geom_line() +
+        scale_color_brewer(palette = "Set2") +
+        labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et de la classe sociale", 
+             color = "Classe sociale") +
+        facet_wrap(~sexe)+
+        theme_minimal()
+      
     })
     
     #Server de Cindy
