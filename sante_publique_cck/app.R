@@ -198,11 +198,12 @@ server <- function(input, output) {
     
     #Graphe mortalité classe sociale
     output$mortalite_classe <- renderPlot({
+      
       morta_cs %>%
         filter(int_annee == input$Annees_cs) %>%
         filter(indicateur == input$Indicateur_cs) %>%
         ggplot() +
-        aes(x = age, y = valeur_cs, colour = classe_social) +
+        aes(x = age, y = valeur_cs, colour = classe_sociale) +
         geom_line() +
         scale_color_brewer(palette = "Set2") +
         labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et de la classe sociale", 
