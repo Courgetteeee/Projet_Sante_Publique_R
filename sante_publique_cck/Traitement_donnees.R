@@ -4,6 +4,7 @@ library(purrr)
 library(readxl)
 library(stringr)
 library(tidyr)
+library(sf)
 
 
 ## Import et prétraitement des données de Clara --------------------------------
@@ -174,3 +175,62 @@ saveRDS(morta_cs, "donnees_traitees/morta_cs.rds")
 
 
 ##Import et prétraitement des données de Cindy ---------------------------------
+
+#Lecture et preparation des données
+charger_apl_medecin_annee <- function(annee){
+  df <- read_excel(
+    "data/Indicateur d'accessibilité potentielle localisée (APL) aux médecins généralistes.xlsx",
+    sheet= paste0("APL ", annee), skip=8) %>%
+    slice(-1) %>%
+    #Rename des colonnes
+    rename(
+      code_commune=`Code commune INSEE`,
+      commune=Commune,
+      apl_generalistes=`APL aux médecins généralistes`,
+      pop_totale=paste0("Population totale ", annee-2)
+    ) %>%
+    #Modification type colonnes
+    mutate(
+      code_commune=as.character(code_commune),
+      apl_generalistes=as.numeric(apl_generalistes),
+      pop_totale=as.numeric(pop_totale),
+      annee = annee)
+  
+  return(df)
+}
+
+#chargement données par années
+df_communes_2022 <- charger_apl_medecin_annee(2022)
+df_communes_2023 <- charger_apl_medecin_annee(2023)
+#Combine des deux années
+df_communes <- bind_rows(df_communes_2022,df_communes_2023)
+
+
+#Chargement données
+#quiet = TRUE : pas d'affichage
+communes_geo <- st_read(
+  "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune/exports/geojson",
+  quiet = TRUE)%>%
+  mutate(code_commune=as.character(com_code))
+
+
+# Fusion de commune et nos données par code_commune
+communes_avec_geo <- communes_geo %>%
+  left_join(df_communes, by="code_commune")%>%
+  filter(!substr(code_commune, 1, 2) %in% c("97", "98"))
+
+
+#Regroupe les communes par région
+regions_apl<-communes_avec_geo %>%
+  group_by(reg_code, reg_name, annee) %>%
+  summarise(
+    #apl_moyen par région
+    apl_moyen=mean(apl_generalistes, na.rm=TRUE),
+    #Population totale par région
+    population_totale=sum(pop_totale, na.rm=TRUE), .groups="drop")
+
+
+#Sauvegarder les données (format .rds)
+saveRDS( list( communes = communes_avec_geo, regions = regions_apl),
+         file = "donnees_traitees/donnees_propres_apl_generalistes.rds")
+
