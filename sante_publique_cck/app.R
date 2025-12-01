@@ -16,6 +16,7 @@ library(readxl)
 library(shiny)
 library(stringr)
 library(tidyr)
+library(sf)
 
 
 # Import tables Clara
@@ -28,6 +29,11 @@ morta_dip<-readRDS("../donnees_traitees/morta_dip.rds")
 mortalite_cause<-readRDS("../donnees_traitees/mortalite_cause.rds")
 mortalite_combine<-readRDS("../donnees_traitees/mortalite_combine.rds")
 mortalite_perinatale<-readRDS("../donnees_traitees/mortalite_perinatale.rds")
+
+# Import tables Cindy :
+donnees_apl_generalistes <- readRDS("../donnees_traitees/donnees_propres_apl_generalistes.rds")
+communes_avec_geo_apl_gener <- donnees_apl_generalistes$communes
+regions_apl_gener <- donnees_apl_generalistes$regions
 
 
 # ---------------------------- UI -----------------------------------
@@ -111,20 +117,82 @@ ui <- navbarPage(
     )
   ),
 
-
-  tabPanel("Page de Cindy Modifie ton titre comme tu veux",
-           # Sidebar with a slider input for number of bins 
-           sidebarLayout(
-              sidebarPanel(
-                
-              ),
-              mainPanel(
-                
-                
-              ),
-  
-            ),
-          )
+  # IU de Cindy
+  tabPanel("Accessibilité aux médecins généralistes (APL)",
+           #Selection de l'année global en haut
+           fluidRow(
+             column(
+               width = 3,
+               selectInput(
+                 inputId = "annee_choisie",
+                 label = "Année",
+                 choices = sort(unique(communes_avec_geo_apl_gener$annee),
+                                decreasing = TRUE),
+                 selected = max(communes_avec_geo_apl_gener$annee,
+                                na.rm = TRUE)
+               )
+             )
+           ),
+           
+           
+           tabsetPanel(  
+             #Onglet 1 : France entière
+             tabPanel(
+               #Titre de l'onglet
+               "France entière",
+               #break line : saut de ligne
+               br(),
+               #h4 : Titre niveau 4 (1 a 6)
+               h4("Carte par région"),
+               plotOutput("carte_france_gener", height = "600px")
+             ),
+             
+             
+             #Onglet 2 : Par région
+             tabPanel(
+               #Titre
+               "Par région",
+               #Saut de ligne
+               br(),
+               #Divise la page en deux colonnes
+               sidebarLayout(
+                 
+                 #Zone side à gauche
+                 sidebarPanel(
+                   
+                   #Menu déroulant
+                   selectInput(
+                     inputId = "region_choisie",
+                     label = "Choisissez une région",
+                     choices = { communes_avec_geo_apl_gener %>%
+                         st_drop_geometry() %>%
+                         pull(reg_name) %>% as.character() %>%
+                         unique() %>% na.omit() %>% sort()
+                     },
+                     selected = "Bourgogne-Franche-Comté"),
+                   
+                   #Barre horizontale
+                   hr(),
+                   #titre niveau 5
+                   h5("Informations"),
+                   textOutput("info_region")
+                 ),
+                 
+                 #Zone principale à droite
+                 mainPanel( plotOutput("carte_region_gener", height = "600px")
+                 )
+               )
+             ),
+             
+             #Onglet 3 : Evolution
+             tabPanel(
+               "Evolution 2022-2023",
+               br(),
+               h3("Evolution de l'APL moyen par région"),
+               #plotOutput("graphique_evolution_apl_gener", height="580px")
+             )
+           )
+    )
   )
 
 # ---------------------------- SERVER -----------------------------------
@@ -214,6 +282,63 @@ server <- function(input, output) {
     })
     
     #Server de Cindy
+    
+    #### Données filtrer par année
+    regions_filtre_apl_gener <- reactive({
+      regions_apl_gener  %>% filter(annee==input$annee_choisie)
+    })
+    communes_filtre_apl_gener2 <- reactive({
+      communes_avec_geo_apl_gener  %>% filter(annee==input$annee_choisie)
+    })
+    
+    
+    ###### Carte France entière
+    output$carte_france_gener <- renderPlot ({
+      ggplot(regions_filtre_apl_gener())+
+        geom_sf(aes(fill=apl_moyen), color ="black", size=0.1)+
+        scale_fill_viridis_c( option = "magma",
+                              name = "APL moyen")+
+        theme_minimal()+
+        labs( title = "APL moyen par région",
+              subtitle = "Médecins généralistes")
+    })
+    
+    
+    ####### Carte REGION séléctionné
+    output$carte_region_gener <- renderPlot({
+      
+      ##Filter les communes de la région choisie
+      region_filtree <- communes_filtre_apl_gener2() %>%
+        filter( reg_name == input$region_choisie)
+      
+      ##Carte
+      ggplot(region_filtree)+
+        geom_sf( aes(fill = apl_generalistes), color=NA)+
+        scale_fill_viridis_c(option = "magma", name = "APL")+
+        theme_minimal()+
+        labs( title = paste("APL par commune -", input$region_choisie),
+              subtitle = paste0("Médecins généralistes ", input$annee_choisie))
+    })
+    
+    
+    #Information sur la région
+    output$info_region <- renderText({
+      
+      region_info <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        filter(reg_name == input$region_choisie)
+      
+      #Vérification des infos
+      if (nrow(region_info)==0){
+        return("Aucune données disponible pour cette région.")
+      }
+      
+      apl <- as.numeric(region_info$apl_moyen)
+      pop <- as.numeric(region_info$population_totale)
+      
+      paste0( "APL moyen : ", round(apl,2), "   ",
+              "\nPopulation totale : ", format(pop, big.mark=" "))
+    })
 }
 
 # ---------------------------- GLOBAL -----------------------------------
