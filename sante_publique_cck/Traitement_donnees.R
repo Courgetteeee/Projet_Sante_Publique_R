@@ -9,6 +9,8 @@ library(sf)
 
 ## Import et prétraitement des données de Clara --------------------------------
 
+# Medecin
+
 medecin<-read_excel("data/Med_2012_2025.xlsx", sheet=2)
 
 
@@ -20,9 +22,47 @@ medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
                                                names_to = "annee", values_to = "effectif") %>% 
   mutate(annee=as.integer(sub("effectif_", "", annee)))
 
-
 saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
 
+# Inf liberal
+
+inf_lib<-read_excel("data/Inf_lib_2012_2023.xlsx", sheet=2)
+
+inf_lib_clean <- inf_lib %>% 
+  filter(region != "00 - Ensemble", departement != "00 - Ensemble", sexe=="0 - Ensemble", tranche_age == "00 - Ensemble") %>% 
+  select(-...17)
+
+inf_lib_long <- inf_lib_clean %>% 
+  pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
+  mutate(annee=as.integer(sub("effectif_", "", annee))) %>% 
+  mutate(departement=str_replace_all(departement, " ", "")) %>% 
+  mutate(region=str_replace_all(region, " ", "")) %>% 
+  filter(!annee %in% c(2012, 2022, 2023))
+
+inf_lib_long <- inf_lib_long %>% mutate(data_type = "Libéraux")
+
+saveRDS(inf_lib_long, "donnees_traitees/inf_lib_long.rds")
+
+
+# Inf sal
+
+inf_sal<-read_excel("data/Inf_sal_2013_2021.xlsx", sheet=2)
+
+inf_sal_clean_names <- inf_sal %>% 
+  rename(secteur_activite = `Secteur d'activité`, specialite = `Spécialité`, Tranche_age = `Tranche d'âge`, region = `Région`,
+         departement = `Département`)
+
+inf_sal_clean <- inf_sal_clean_names %>% 
+  filter(region != "00-France entière (hors Mayotte)", departement != "00-Région entière", departement != "00-Région entière",
+         secteur_activite == "0-Ensemble", specialite == "0-Ensemble", Sexe == "0-Ensemble", Tranche_age == "00-Ensemble")
+
+inf_sal_long <- inf_sal_clean %>% 
+  pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
+  mutate(annee=as.integer(sub("effectif_", "", annee)))
+
+inf_sal_long <- inf_sal_long %>% mutate(data_type = "Salariés")
+
+saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
 
 ## Import et prétraitement des données de Karla --------------------------------

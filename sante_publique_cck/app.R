@@ -19,9 +19,11 @@ library(tidyr)
 library(sf)
 
 
-# Import tables Clara
+# Import tables Clara :
 medecin_long <- readRDS("../donnees_traitees/medecin_long.rds")
-
+inf_lib_long <- readRDS("../donnees_traitees/inf_lib_long.rds")
+inf_sal_long <- readRDS("../donnees_traitees/inf_sal_long.rds")
+inf_lib_sal <- bind_rows(inf_lib_long, inf_sal_long)
 
 # Import tables Karla : 
 morta_cs<-readRDS("../donnees_traitees/morta_cs.rds")
@@ -44,24 +46,41 @@ ui <- navbarPage(
   "Santé publique sur le territoire",
 
   #UI de Clara
-  tabPanel("Page de Clara, modifie ton titre comme tu veux",
-    sidebarLayout(
-        sidebarPanel(
-          selectInput(inputId="departement", label="Choisir un département :", choices=medecin_long$departement, 
-                      selected=medecin_long$departement[1]),
-          selectInput(inputId="specialites", label="Choisir une spécialités :", choices=medecin_long$specialites, 
-                      selected=medecin_long$specialites[1]),
-          downloadLink('downloadData', 'Download')
-        ),
-
-        # Show a plot of the generated distribution
-        mainPanel(
-          tabsetPanel(
-            tabPanel("Evolution des effectifs",
-                     plotOutput("effectifs_medecin")
+  tabPanel("Offre de soin et de prévention d’un territoire",
+    tabsetPanel(
+      
+      tabPanel("Evolution des effectifs chez les medecins",
+        sidebarLayout(
+            sidebarPanel(
+              selectInput(inputId="departement", label="Choisir un département :", choices=sort(unique(medecin_long$departement)), 
+                          selected=medecin_long$departement[1]),
+              selectInput(inputId="specialites", label="Choisir une spécialités :", choices=sort(unique(medecin_long$specialites)), 
+                          selected=medecin_long$specialites[1]),
+              downloadLink('downloadData', 'Download')
             ),
+    
+            # Show a plot of the generated distribution
+            mainPanel(
+              plotOutput("effectifs_medecin")
+            )
           )
-        )
+        ),
+      
+      tabPanel("Evolution des effectifs chez les infirmiers",
+               sidebarLayout(
+                 sidebarPanel(
+                   selectInput(inputId="departement2", label="Choisir un département :", 
+                               choices=sort(unique(inf_lib_sal$departement)), 
+                               selected=inf_lib_sal$departement[1]),
+                   downloadLink('downloadData', 'Download')
+                 ),
+                 
+                 # Show a plot of the generated distribution
+                 mainPanel(
+                   plotOutput("effectifs_infirmiers")
+                 )
+               )
+            )
       )
     ),
   
@@ -203,12 +222,13 @@ server <- function(input, output) {
   
   #Server de Clara
   
-  # Affiche le bouton de téléchargement
+    # Affiche le bouton de téléchargement
     output$downloadData <- downloadHandler(filename = function(){
       paste('data-', Sys.Date(), '.csv', sep='')}, 
       content = function(con){
         write.csv(data, con)})
-
+    
+    # Graphe effectifs medecins
     output$effectifs_medecin <- renderPlot({
       medecin_long %>% filter(departement==input$departement, specialites==input$specialites) %>% 
       ggplot(aes(x=annee, y=effectif)) +
@@ -218,6 +238,17 @@ server <- function(input, output) {
         ylab("Effectif") +
         ggtitle("Évolution des effectifs") +
         theme_bw()
+    })
+    
+    # Graphe effectifs infirmiers
+    output$effectifs_infirmiers <- renderPlot({
+      inf_lib_sal %>% filter(departement==input$departement2) %>%
+      ggplot(aes(x = annee, y = effectif, col=data_type)) +
+        geom_line() +
+        facet_wrap(~data_type, scales = "free_y") +
+        scale_x_continuous(breaks = unique(inf_lib_sal$annee)) +
+        theme_minimal() +
+        labs(title = "Effectifs par année")
     })
     
     #Server de Karla
