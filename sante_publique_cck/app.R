@@ -24,6 +24,7 @@ medecin_long <- readRDS("../donnees_traitees/medecin_long.rds")
 inf_lib_long <- readRDS("../donnees_traitees/inf_lib_long.rds")
 inf_sal_long <- readRDS("../donnees_traitees/inf_sal_long.rds")
 inf_lib_sal <- bind_rows(inf_lib_long, inf_sal_long)
+APL_med_long <- readRDS("../donnees_traitees/APL_med_long.rds")
 
 # Import tables Karla : 
 morta_cs<-readRDS("../donnees_traitees/morta_cs.rds")
@@ -85,15 +86,24 @@ ui <- navbarPage(
       tabPanel("Décalage entre l’offre et le besoin de soins",
                sidebarLayout(
                  sidebarPanel(
-                   selectInput(inputId="departement2", label="Choisir un département :", 
-                               choices=sort(unique(inf_lib_sal$departement)), 
-                               selected=inf_lib_sal$departement[1]),
+                   selectInput(inputId="Commune", label="Choisir une Commune :", 
+                               choices=sort(unique(APL_med_long$Commune)), 
+                               selected=APL_med_long$Commune[1]),
+                   
+                   radioButtons("type_seuil",
+                                "Seuil de référence :",
+                                choices = c("Médiane"="mediane",
+                                            "Moyenne"="moyenne",
+                                            "1er quartile (25%)"="q25"),
+                                selected="moyenne"),
+                   
+                   h4(textOutput("valeur_seuil")),
                    downloadLink('downloadData', 'Download')
                  ),
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("effectifs_infirmiers")
+                   plotOutput("offre_besoin_med")
                  )
                )
             )
@@ -267,6 +277,36 @@ server <- function(input, output) {
         theme_minimal() +
         labs(title = "Effectifs par année")
     })
+    
+    # Pour APL
+    seuil_reactive <- reactive({
+      apl_tous <- APL_med_long %>%
+        filter(age_medecins=="APL_tous")
+      
+      if(input$type_seuil=="mediane"){
+        median(apl_tous$APL, na.rm=TRUE)
+      }else if(input$type_seuil=="moyenne"){
+        mean(apl_tous$APL, na.rm=TRUE)
+      }else{
+        quantile(apl_tous$APL, 0.25, na.rm=TRUE)
+      }
+    })
+    
+    output$valeur_seuil <- renderText({
+      paste("Seuil =", round(seuil_reactive(), 2))
+    })
+    
+    output$offre_besoin_med <- renderPlot({
+      APL_med_long %>% 
+        filter(Commune==input$Commune) %>% 
+        ggplot(aes(x=age_medecins, y=APL, fill=age_medecins)) +
+          geom_col() +
+          geom_hline(yintercept=seuil_reactive(), color="red3") +
+          geom_text(aes(label =round(APL, 2)), vjust=-0.5, size=4) +
+          facet_wrap(~annee) +
+          theme_bw()
+    })
+
     
     #Server de Karla
     
