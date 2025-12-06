@@ -89,15 +89,6 @@ ui <- navbarPage(
                    selectInput(inputId="Commune", label="Choisir une Commune :", 
                                choices=sort(unique(APL_med_long$Commune)), 
                                selected=APL_med_long$Commune[1]),
-                   
-                   radioButtons("type_seuil",
-                                "Seuil de référence :",
-                                choices = c("Médiane"="mediane",
-                                            "Moyenne"="moyenne",
-                                            "1er quartile (25%)"="q25"),
-                                selected="moyenne"),
-                   
-                   h4(textOutput("valeur_seuil")),
                    downloadLink('downloadData', 'Download')
                  ),
                  
@@ -263,47 +254,39 @@ server <- function(input, output) {
         geom_point(color="steelblue", size=3) +
         xlab("Année") +
         ylab("Effectif") +
-        ggtitle("Évolution des effectifs") +
+        ggtitle("Évolution des effectifs des médecins") +
         theme_bw()
     })
     
     # Graphe effectifs infirmiers
     output$effectifs_infirmiers <- renderPlot({
       inf_lib_sal %>% filter(departement==input$departement2) %>%
-      ggplot(aes(x = annee, y = effectif, col=data_type)) +
+      ggplot(aes(x=annee, y=effectif, col=data_type)) +
         geom_line() +
-        facet_wrap(~data_type, scales = "free_y") +
-        scale_x_continuous(breaks = unique(inf_lib_sal$annee)) +
-        theme_minimal() +
-        labs(title = "Effectifs par année")
+        facet_wrap(~data_type, scales="free_y") +
+        scale_x_continuous(breaks=unique(inf_lib_sal$annee)) +
+        theme_bw() +
+        labs(title="Effectifs par année des infirmiers",
+             x="Année", y="Effectif") +
+        scale_color_discrete(name="Type d'infirmiers")
     })
     
     # Pour APL
-    seuil_reactive <- reactive({
-      apl_tous <- APL_med_long %>%
-        filter(age_medecins=="APL_tous")
-      
-      if(input$type_seuil=="mediane"){
-        median(apl_tous$APL, na.rm=TRUE)
-      }else if(input$type_seuil=="moyenne"){
-        mean(apl_tous$APL, na.rm=TRUE)
-      }else{
-        quantile(apl_tous$APL, 0.25, na.rm=TRUE)
-      }
-    })
-    
-    output$valeur_seuil <- renderText({
-      paste("Seuil =", round(seuil_reactive(), 2))
-    })
-    
     output$offre_besoin_med <- renderPlot({
       APL_med_long %>% 
         filter(Commune==input$Commune) %>% 
         ggplot(aes(x=age_medecins, y=APL, fill=age_medecins)) +
           geom_col() +
-          geom_hline(yintercept=seuil_reactive(), color="red3") +
-          geom_text(aes(label =round(APL, 2)), vjust=-0.5, size=4) +
+          geom_text(aes(label=round(APL, 2)), vjust=-0.5, size=4) +
           facet_wrap(~annee) +
+          labs(x="Tranche d'âge des médecins",
+          y="Accessibilité potentielle localisée",
+          title=paste("Nombre de consultations par habitants : ", input$Commune)) +
+          scale_fill_discrete(name="Âge des médecins", 
+                              labels=c("APL_60"="Médecins ≤ 60 ans", 
+                                       "APL_65"="Médecins ≤ 65 ans", 
+                                       "APL_62"="Médecins ≤ 62 ans", 
+                                       "APL_tous"="Tous les médecins")) +
           theme_bw()
     })
 
