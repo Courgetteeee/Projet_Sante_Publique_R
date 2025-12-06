@@ -64,6 +64,37 @@ inf_sal_long <- inf_sal_long %>% mutate(data_type = "Salariés")
 
 saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
+# APL
+
+APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet=2, skip=8)
+APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet=3, skip=8)
+
+APL_med_2022_clean <- APL_med_2022 %>% slice(-1) %>% 
+  rename(Code_INSEE=`Code commune INSEE`, APL_tous=`APL aux médecins généralistes`, 
+         APL_65 =`APL aux médecins généralistes de 65 ans et moins`,
+         APL_62=`APL aux médecins généralistes de 62 ans et moins`,
+         APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
+         Pop_tot=`Population totale 2020`,
+         Pop_standardisee_med=`Population standardisée 2020 pour la médecine générale`) %>% mutate(annee=2022)
+
+APL_med_2023_clean <- APL_med_2023 %>% slice(-1) %>% 
+  rename(Code_INSEE=`Code commune INSEE`, APL_tous=`APL aux médecins généralistes`, 
+         APL_65 =`APL aux médecins généralistes de 65 ans et moins`,
+         APL_62=`APL aux médecins généralistes de 62 ans et moins`,
+         APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
+         Pop_tot=`Population totale 2021`,
+         Pop_standardisee_med=`Population standardisée 2021 pour la médecine générale`) %>% mutate(annee=2023)
+
+APL_med <- bind_rows(APL_med_2022_clean, APL_med_2023_clean)
+
+APL_med_long <- APL_med %>%
+  select(Commune, Code_INSEE, Pop_standardisee_med, APL_tous, APL_65, APL_62, APL_60, annee) %>%
+  pivot_longer(cols=starts_with("APL"), names_to="age_medecins", values_to="APL") %>% 
+  mutate(Pop_standardisee_med = as.numeric(Pop_standardisee_med), 
+         APL=as.numeric(APL), age_medecins=factor(age_medecins))
+
+saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
+
 
 ## Import et prétraitement des données de Karla --------------------------------
 

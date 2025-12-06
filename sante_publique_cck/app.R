@@ -80,7 +80,24 @@ ui <- navbarPage(
                    plotOutput("effectifs_infirmiers")
                  )
                )
+            ),
+      
+      tabPanel("Décalage entre l’offre et le besoin de soins",
+               sidebarLayout(
+                 sidebarPanel(
+                   selectInput(inputId="departement2", label="Choisir un département :", 
+                               choices=sort(unique(inf_lib_sal$departement)), 
+                               selected=inf_lib_sal$departement[1]),
+                   downloadLink('downloadData', 'Download')
+                 ),
+                 
+                 # Show a plot of the generated distribution
+                 mainPanel(
+                   plotOutput("effectifs_infirmiers")
+                 )
+               )
             )
+      
       )
     ),
   
@@ -99,7 +116,7 @@ ui <- navbarPage(
               sidebarLayout(
                 sidebarPanel(
                   selectInput(inputId="Cause", label="Choisir la cause du décès :", 
-                              choices=mortalite_cause$variable),
+                              choices=sort(unique(mortalite_cause$variable))),
                 ),
                 mainPanel(
                   plotOutput("mortalite_cause_bar")
@@ -110,9 +127,9 @@ ui <- navbarPage(
               sidebarLayout(
                 sidebarPanel(
                   selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenter :", 
-                              choices=morta_dip$indicateur),
+                              choices=sort(unique(morta_dip$indicateur))),
                   selectInput(inputId="Annees", label="Années :", 
-                              choices=morta_dip$int_annee),
+                              choices=sort(unique(morta_dip$int_annee))),
                 ),
                 mainPanel(
                   plotOutput("mortalite_diplome")
@@ -123,9 +140,9 @@ ui <- navbarPage(
               sidebarLayout(
                 sidebarPanel(
                   selectInput(inputId="Indicateur_cs", label="Choisir l'indicateur a représenter :", 
-                              choices=morta_cs$indicateur),
+                              choices=sort(unique(morta_cs$indicateur))),
                   selectInput(inputId="Annees_cs", label="Années :", 
-                              choices=morta_cs$int_annee),
+                              choices=sort(unique(morta_cs$int_annee))),
                 ),
                 mainPanel(
                   plotOutput("mortalite_classe")
