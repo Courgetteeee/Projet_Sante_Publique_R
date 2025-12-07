@@ -58,7 +58,7 @@ ui <- navbarPage("Santé publique sur le territoire",
             sidebarPanel(
               selectInput(inputId="departement", label="Choisir un département :", choices=sort(unique(medecin_long$departement)), 
                           selected=medecin_long$departement[1]),
-              selectInput(inputId="specialites", label="Choisir une spécialités :", choices=sort(unique(medecin_long$specialites)), 
+              selectInput(inputId="specialites", label="Choisir une spécialité :", choices=sort(unique(medecin_long$specialites)), 
                           selected=medecin_long$specialites[1]),
               downloadLink('downloadData', 'Download')
             ),
@@ -119,6 +119,7 @@ ui <- navbarPage("Santé publique sur le territoire",
              
      tabPanel("Mortalité Périnatale",
         fluidPage(
+          downloadLink('downloadData', 'Download'),
           plotOutput("mortalite_peri_reg")
         )
      ),
@@ -128,6 +129,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                 sidebarPanel(
                   selectInput(inputId="Cause", label="Choisir la cause du décès :", 
                               choices=sort(unique(mortalite_cause$variable))),
+                  downloadLink('downloadData', 'Download')
                 ),
                 mainPanel(
                   plotOutput("mortalite_cause_bar")
@@ -141,6 +143,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                               choices=sort(unique(morta_dip$indicateur))),
                   selectInput(inputId="Annees", label="Années :", 
                               choices=sort(unique(morta_dip$int_annee))),
+                  downloadLink('downloadData', 'Download')
                 ),
                 mainPanel(
                   plotOutput("mortalite_diplome")
@@ -154,6 +157,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                               choices=sort(unique(morta_cs$indicateur))),
                   selectInput(inputId="Annees_cs", label="Années :", 
                               choices=sort(unique(morta_cs$int_annee))),
+                  downloadLink('downloadData', 'Download')
                 ),
                 mainPanel(
                   plotOutput("mortalite_classe")
@@ -247,14 +251,14 @@ ui <- navbarPage("Santé publique sur le territoire",
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   
-  
-  #Server de Clara
-  
     # Affiche le bouton de téléchargement
     output$downloadData <- downloadHandler(filename = function(){
       paste('data-', Sys.Date(), '.csv', sep='')}, 
       content = function(con){
         write.csv(data, con)})
+  
+  
+    #Server de Clara
     
     # Graphe effectifs medecins
     output$effectifs_medecin <- renderPlot({
