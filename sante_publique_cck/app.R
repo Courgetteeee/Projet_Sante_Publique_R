@@ -19,6 +19,7 @@ library(tidyr)
 library(sf)
 library(shiny)
 library(shinythemes)
+library(shinycssloaders)
 
 
 # Import tables Clara :
@@ -46,11 +47,25 @@ regions_apl_gener <- donnees_apl_generalistes$regions
 
 
 # Define UI for application that draws a histogram
-ui <- navbarPage("Santé publique sur le territoire",
-                 theme = shinytheme("flatly"),
+ui <- navbarPage(
+  "Santé publique sur le territoire",
+  theme = shinytheme("flatly"),
+  
+  #Titre onglet interractif
+  tags$head(
+    tags$style(HTML("
+                    .navbar-default .navbar-nav > li > a:hover, .nav-tabs > li > a:hover{
+                    background-color: #f0f7ff !important;
+                    color : #667eea  !important;
+                    transition: all 0.2s;")), 
+  ),
+                 
 
   #UI de Clara
-  tabPanel("Offre de soin et de prévention d’un territoire",
+  tabPanel(title = tagList(icon("user-md",
+                                style = "font-size: 2em; margin-right:10px;"),
+                           "Offre de soin et de prévention d’un territoire"
+  ),
     tabsetPanel(
       
       tabPanel("Evolution des effectifs chez les medecins",
@@ -65,7 +80,7 @@ ui <- navbarPage("Santé publique sur le territoire",
     
             # Show a plot of the generated distribution
             mainPanel(
-              plotOutput("effectifs_medecin")
+              plotOutput("effectifs_medecin")%>% withSpinner(color="#667eea")
             )
           )
         ),
@@ -81,7 +96,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("effectifs_infirmiers")
+                   plotOutput("effectifs_infirmiers")%>% withSpinner(color="#667eea")
                  )
                )
             ),
@@ -103,8 +118,8 @@ ui <- navbarPage("Santé publique sur le territoire",
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("offre_besoin_med"),
-                   plotOutput("offre_besoin_inf")
+                   plotOutput("offre_besoin_med")%>% withSpinner(color="#667eea"),
+                   plotOutput("offre_besoin_inf")%>% withSpinner(color="#667eea")
                  )
                )
             )
@@ -113,14 +128,17 @@ ui <- navbarPage("Santé publique sur le territoire",
     ),
   
   #UI de Karla
-  tabPanel("Études de la mortalité sur le territoire",
+  tabPanel(title = tagList(icon("heartbeat",
+                                style = "font-size: 2em; margin-right:10px;"),
+                           "Études de la mortalité sur le territoire"
+  ),
            
     tabsetPanel(
              
      tabPanel("Mortalité Périnatale",
         fluidPage(
           downloadLink('downloadData', 'Download'),
-          plotOutput("mortalite_peri_reg")
+          plotOutput("mortalite_peri_reg")%>% withSpinner(color="#667eea")
         )
      ),
              
@@ -132,7 +150,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                   downloadLink('downloadData', 'Download')
                 ),
                 mainPanel(
-                  plotOutput("mortalite_cause_bar")
+                  plotOutput("mortalite_cause_bar")%>% withSpinner(color="#667eea")
                 )
               )
      ),
@@ -154,7 +172,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                   )
                 ),
                 mainPanel(
-                  plotOutput("mortalite_diplome")
+                  plotOutput("mortalite_diplome")%>% withSpinner(color="#667eea")
                 )
               )
      ),      
@@ -176,7 +194,7 @@ ui <- navbarPage("Santé publique sur le territoire",
                   )
                 ),
                 mainPanel(
-                  plotOutput("mortalite_classe")
+                  plotOutput("mortalite_classe")%>% withSpinner(color="#667eea")
                 )
               )
      )
@@ -185,87 +203,227 @@ ui <- navbarPage("Santé publique sur le territoire",
   ),
 
   # IU de Cindy
-  tabPanel("Accessibilité aux médecins généralistes (APL)",
-           #Selection de l'année global en haut
-           fluidRow(
-             column(
-               width = 3,
-               selectInput(
-                 inputId = "annee_choisie",
-                 label = "Année",
-                 choices = sort(unique(communes_avec_geo_apl_gener$annee),
-                                decreasing = TRUE),
-                 selected = max(communes_avec_geo_apl_gener$annee,
-                                na.rm = TRUE)
-               )
-             )
-           ),
-           
-           
-           tabsetPanel(  
-             #Onglet 1 : France entière
-             tabPanel(
-               #Titre de l'onglet
-               "France entière",
-               #break line : saut de ligne
-               br(),
-               #h4 : Titre niveau 4 (1 a 6)
-               h4("Carte par région"),
-               plotOutput("carte_france_gener", height = "600px")
-             ),
-             
-             
-             #Onglet 2 : Par région
-             tabPanel(
-               #Titre
-               "Par région",
-               #Saut de ligne
-               br(),
-               #Divise la page en deux colonnes
-               sidebarLayout(
-                 
-                 #Zone side à gauche
-                 sidebarPanel(
-                   
-                   #Menu déroulant
-                   selectInput(
-                     inputId = "region_choisie",
-                     label = "Choisissez une région",
-                     choices = { communes_avec_geo_apl_gener %>%
-                         st_drop_geometry() %>%
-                         pull(reg_name) %>% as.character() %>%
-                         unique() %>% na.omit() %>% sort()
-                     },
-                     selected = "Bourgogne-Franche-Comté"),
-                   
-                   #Barre horizontale
-                   hr(),
-                   #titre niveau 5
-                   h5("Informations"),
-                   textOutput("info_region")
+  tabPanel(
+    title = tagList(icon("map-marked-alt", style = "font-size: 2em; margin-right:10px;"),
+                    " Accessibilité aux médecins généralistes (APL)"
+    ),
+    
+    #Selection de l'année global en haut
+    fluidRow(
+      column(
+        width = 3,
+        selectInput(
+          inputId = "annee_choisie",
+          label = "Année",
+          choices = sort(unique(communes_avec_geo_apl_gener$annee),
+                         decreasing = TRUE),
+          selected = max(communes_avec_geo_apl_gener$annee,
+                         na.rm = TRUE)
+        )
+      )
+    ),
+    
+    #Info sur l'apl / Définition
+    fluidRow(
+      column(12,
+             div(
+               style="background: #e3f2fd; margin: 20px 0;border-radius: 5px;",
+               icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
+               strong("Qu'est ce que l'APL ? "),
+               "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins et
+                      la demande de soins sur un territoire. Plus l'APL est elevé, meilleure est l'accessibilité."
+             ))
+    ),
+    
+    
+    
+    tabsetPanel(  
+      #Onglet 1 : Par région
+      tabPanel(
+        #Titre
+        "Carte régionale",
+        #Saut de ligne
+        br(),
+        
+        
+        #Divise la page en deux colonnes
+        fluidRow(
+          
+          #Colonne de gauche
+          column(width=5,
+                 #Menu déroulant
+                 selectInput(
+                   inputId = "region_choisie",
+                   label = "Choisissez une région",
+                   choices = { communes_avec_geo_apl_gener %>%
+                       st_drop_geometry() %>%
+                       pull(reg_name) %>% as.character() %>%
+                       unique() %>% na.omit() %>% sort()
+                   },
+                   selected = "Bourgogne-Franche-Comté"
                  ),
                  
-                 #Zone principale à droite
-                 mainPanel( plotOutput("carte_region_gener", height = "600px")
+                 #Bouton dowload
+                 downloadButton("download_carte_region", "Télécharger la carte",
+                                style="background-color: #667eea; border:none;margin-bottom: 20px;"),
+                 
+                 br(),
+                 
+                 
+                 #Indicateur 1 : Classement de la région
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("Classement national", style="margin-bottom: 0; font-size: 1.7em;"),
+                   uiOutput("classement_region"),
+                   p("Sur l'accessibilité aux médecins généralistes", style = "margin-bottom: 0;")
+                 ),
+                 
+                 #Indicateur 2 : APL moyen
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("APL moyen de la région", style="margin-bottom: 0; font-size: 1.7em;"),
+                   uiOutput("apl_region_selectionnee"),
+                   p("Médecin généraliste", style = "margin-bottom: 0;")
+                 ),
+                 
+                 #Indicateur 3 : Population de la région
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("Population totale de la région", style="margin-bottom: 0; font-size: 1.7em;"),
+                   uiOutput("population_region"),
+                   p("Habitants (recensement)", style = "margin-bottom: 0;")
                  )
-               )
-             ),
-             
-             #Onglet 3 : Evolution
-             tabPanel(
-               "Evolution 2022-2023",
-               br(),
-               h3("Evolution de l'APL moyen par région"),
-               #plotOutput("graphique_evolution_apl_gener", height="580px")
-             )
-           )
+                 
+          ),
+          
+          #Colonne de droite : carte
+          column(width=7,
+                 h4("Carte par région", style="font-size: 2.2em;text-align: center;"),
+                 plotOutput("carte_region_gener", height = "600px")%>% withSpinner(color="#667eea")
+          )
+        )
+      ),
+      
+      
+      #Onglet 2 : France entière
+      tabPanel(
+        #Titre de l'onglet
+        "Carte de France",
+        br(),
+        
+        fluidRow(
+          #Carte à gauche
+          column(width=8,
+                 h4("Carte de la France", style= "font-size: 2.4em;text-align: center;"),
+                 plotOutput("carte_france_gener", height = "600px") %>% withSpinner(color="#667eea")
+          ),
+          
+          
+          #Indicateurs à droite
+          column(width=3,
+                 h4("Indicateurs", style="font-size: 2.4em;text-align: center; margin-bottom: 20px;"),
+                 #Bouton dowload
+                 downloadButton("download_carte_france", "Télécharger la carte",
+                                style="background-color: #667eea; border:none;margin-bottom: 20px;width: 100%;text-align: center;"),
+                 
+                 #Indicateur 1 : APL moyen france
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("APL moyen en France", style="margin-top: 0; font-size: 1.7em;"), 
+                   uiOutput("apl_moyen_france"),
+                   p("Médecins généralistes", style = "margin-bottom: 0;"),
+                 ),
+                 
+                 #Indicateur 2 : Région avec APL max
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("Meilleure accessibilité", style="margin-bottom: 0; font-size: 1.7em;"),
+                   uiOutput("region_max"),
+                   uiOutput("apl_max_valeur"), 
+                 ),
+                 
+                 #Indicateur 3 : Région avec APL min
+                 div(
+                   style = "background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                  color: white; 
+                                  padding: 30px 20px; 
+                                  border-radius: 10px; 
+                                  margin-bottom: 20px;
+                                  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                                  min-height: 150px;
+                                  text-align: center;",
+                   h5("Pire accessibilité", style="margin-bottom: 0; font-size: 1.7em;"),
+                   uiOutput("region_min"),
+                   uiOutput("apl_min_valeur"), 
+                   
+                 ),
+                 
+                 #br(),
+                 
+          ),
+          
+          
+          
+        ),
+      ),
     )
+  ),
+  
+  #Pied de page
+  tags$footer( style="background-color: #ebe8e8;text-align: center;",
+               p("2025/2026 - Projet Santé Publique - Clara GAMBARDELLO, Karla PEM, Cindy LANCON"),
+               p("Master Modélisation Statistique | R avancé")),
+  
   )
 
 # ---------------------------- SERVER -----------------------------------
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+  #MESSAGE de bienvenue
+  showModal(modalDialog(
+    title = div(icon("hand-paper"), "Bienvenue !"),
+    "Bienvenue sur notre tableau de bord de santé publique. Explorez les données sur 
+    l'offre de soins, la mortalité et l'accessiblité aux médecins en France.",
+    footer=modalButton("Explorer !"),
+    easyClose = TRUE
+  ))  
   
     # Affiche le bouton de téléchargement
     output$downloadData <- downloadHandler(filename = function(){
@@ -452,7 +610,8 @@ server <- function(input, output) {
     
     
     ###### Carte France entière
-    output$carte_france_gener <- renderPlot ({
+    #Plot réactif (calculé une seule fois)
+    plot_france <- reactive({
       ggplot(regions_filtre_apl_gener())+
         geom_sf(aes(fill=apl_moyen), color ="black", size=0.1)+
         scale_fill_viridis_c( option = "magma",
@@ -462,11 +621,50 @@ server <- function(input, output) {
               subtitle = "Médecins généralistes")
     })
     
+    #output carte france
+    output$carte_france_gener <- renderPlot ({
+      plot_france()
+    })
+    
+    #INDICATEUR 2.1 APL moyen France
+    output$apl_moyen_france <- renderUI({
+      apl_moyen <- regions_filtre_apl_gener() %>% st_drop_geometry() %>%
+        summarise(apl = mean(apl_moyen, na.rm=TRUE)) %>% pull(apl)
+      tags$div(round(apl_moyen, 1), style="font-size: 2.2em;")
+    })
+    
+    #INDICATEUR 2.2 Région avec APL max
+    ##la région
+    output$region_max <- renderUI({
+      region <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_max(apl_moyen, n=1) %>%
+        pull(reg_name)
+      tags$div(region, style="font-size: 1.8em;font-weight: bold;")
+    })
+    ##l'apl max
+    output$apl_max_valeur <- renderUI({
+      apl_max <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_max(apl_moyen, n=1) %>%
+        pull(apl_moyen)
+      tags$div("APL : ", round(apl_max,1), style="font-size: 2em;")
+    })
+    
+    #INDICATEUR 2.3 Région avec APL min
+    ##la région
+    output$region_min <- renderUI({
+      region <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_min(apl_moyen, n=1) %>%
+        pull(reg_name)
+      tags$div(region, style="font-size: 1.8em;font-weight: bold;")
+    })
+    ##l'apl min
+    output$apl_min_valeur <- renderUI({
+      apl_min <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_min(apl_moyen, n=1) %>%
+        pull(apl_moyen)
+      tags$div("APL : ", round(apl_min,1), style="font-size: 2em;")
+    })
+    
     
     ####### Carte REGION séléctionné
-    output$carte_region_gener <- renderPlot({
-      
-      ##Filter les communes de la région choisie
+    #Graphique réactif (calculé que une fois)
+    plot_region <- reactive({
       region_filtree <- communes_filtre_apl_gener2() %>%
         filter( reg_name == input$region_choisie)
       
@@ -479,25 +677,86 @@ server <- function(input, output) {
               subtitle = paste0("Médecins généralistes ", input$annee_choisie))
     })
     
+    #Plot de la carte
+    output$carte_region_gener <- renderPlot({
+      plot_region()
+    })
     
-    #Information sur la région
-    output$info_region <- renderText({
+    #INDICATEUR 1.1 Classement de la région select
+    output$classement_region <- renderUI({
+      toutes_regions <- regions_filtre_apl_gener() %>% st_drop_geometry()%>%
+        arrange(desc(apl_moyen)) %>% mutate(rang=row_number())
       
+      #Trouver le rang
+      region_info <- toutes_regions %>% filter(reg_name==input$region_choisie)
+      #Si pb information
+      if (nrow(region_info)==0){
+        return("Aucune données disponible pour cette région.")
+      }
+      rang <- region_info$rang
+      total <- nrow(toutes_regions)
+      
+      tags$div(
+        tags$span(paste0(rang,"e "), style="font-size: 2em;"),
+        tags$span(paste0("sur ",total," régions"), style="font-size: 2em;"))
+    })
+    
+    #INDICATEUR 1.2 APL moyen de la région sélectionnée
+    output$apl_region_selectionnee <- renderUI({
       region_info <- regions_filtre_apl_gener() %>%
         st_drop_geometry() %>%
         filter(reg_name == input$region_choisie)
+      #Vérification des infos
+      if (nrow(region_info)==0){
+        return("Aucune données disponible pour cette région.")
+      }
+      apl <- as.numeric(region_info$apl_moyen)
       
+      tags$div(round(apl,1), style="font-size: 2em;")
+    })
+    
+    #INDICATEUR 1.3 Population de la region
+    output$population_region <- renderUI({
+      region_info <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        filter(reg_name == input$region_choisie)
       #Vérification des infos
       if (nrow(region_info)==0){
         return("Aucune données disponible pour cette région.")
       }
       
-      apl <- as.numeric(region_info$apl_moyen)
-      pop <- as.numeric(region_info$population_totale)
+      pop <- region_info$population_totale
       
-      paste0( "APL moyen : ", round(apl,2), "   ",
-              "\nPopulation totale : ", format(pop, big.mark=" "))
+      tags$div(format(pop, big.mark = " ", scientific = FALSE), style="font-size: 2em;")
     })
+    
+    #Téléchargement des cartes
+    ##Carte france
+    output$download_carte_france <- downloadHandler(
+      filename=function(){
+        paste0("carte_france_apl_",input$annee_choisie,"_",Sys.Date(),".png")},
+      content=function(file) {
+        ggsave(file, plot=plot_france())
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Carte de France téléchargée avec succès !", type="message",duration=5)
+    
+      }
+    )
+    #Carte régions
+    output$download_carte_region <- downloadHandler(
+      filename=function(){
+        paste0("carte_region_apl_",input$annee_choisie,"_",Sys.Date(),".png")},
+      content=function(file) {
+        ggsave(file, plot=plot_region())
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Carte Régionale téléchargée avec succès !", type="message",duration=5)
+      }
+    )
+    
 }
 
 # ---------------------------- GLOBAL -----------------------------------
