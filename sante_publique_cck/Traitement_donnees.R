@@ -64,7 +64,7 @@ inf_sal_long <- inf_sal_long %>% mutate(data_type = "Salariés")
 
 saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
-# APL
+# APL med
 
 APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet=2, skip=8)
 APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet=3, skip=8)
@@ -95,6 +95,28 @@ APL_med_long <- APL_med %>%
 
 saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
 
+# APL inf 
+
+APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet=2, skip=8)
+APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet=3, skip=8)
+
+APL_inf_2022_clean <- APL_inf_2022 %>% slice(-1) %>% 
+  rename(Code_INSEE=`Code commune INSEE`, APL_infirmiere=`APL aux infirmières`, 
+         Pop_standardisee=`Population standardisée 2020 pour les infirmières`,
+         Pop_tot=`Population totale 2020`) %>% mutate(annee=2022) %>% 
+  mutate(Pop_standardisee=as.numeric(Pop_standardisee), 
+         APL_infirmiere=as.numeric(APL_infirmiere))
+
+APL_inf_2023_clean <- APL_inf_2023 %>% slice(-1) %>% 
+  rename(Code_INSEE=`Code commune INSEE`, APL_infirmiere=`APL aux infirmières`, 
+         Pop_standardisee=`Population standardisée 2021 pour les infirmières`,
+         Pop_tot=`Population totale 2021`) %>% mutate(annee=2023) %>% 
+  mutate(Pop_standardisee=as.numeric(Pop_standardisee), 
+         APL_infirmiere=as.numeric(APL_infirmiere))
+
+APL_inf <- bind_rows(APL_inf_2022_clean, APL_inf_2023_clean)
+
+saveRDS(APL_inf, "donnees_traitees/APL_inf.rds")
 
 ## Import et prétraitement des données de Karla --------------------------------
 

@@ -17,6 +17,8 @@ library(shiny)
 library(stringr)
 library(tidyr)
 library(sf)
+library(shiny)
+library(shinythemes)
 
 
 # Import tables Clara :
@@ -25,6 +27,7 @@ inf_lib_long <- readRDS("../donnees_traitees/inf_lib_long.rds")
 inf_sal_long <- readRDS("../donnees_traitees/inf_sal_long.rds")
 inf_lib_sal <- bind_rows(inf_lib_long, inf_sal_long)
 APL_med_long <- readRDS("../donnees_traitees/APL_med_long.rds")
+APL_inf <- readRDS("../donnees_traitees/APL_inf.rds")
 
 # Import tables Karla : 
 morta_cs<-readRDS("../donnees_traitees/morta_cs.rds")
@@ -43,8 +46,8 @@ regions_apl_gener <- donnees_apl_generalistes$regions
 
 
 # Define UI for application that draws a histogram
-ui <- navbarPage(
-  "Santé publique sur le territoire",
+ui <- navbarPage("Santé publique sur le territoire",
+                 theme = shinytheme("flatly"),
 
   #UI de Clara
   tabPanel("Offre de soin et de prévention d’un territoire",
@@ -89,12 +92,19 @@ ui <- navbarPage(
                    selectInput(inputId="Commune", label="Choisir une Commune :", 
                                choices=sort(unique(APL_med_long$Commune)), 
                                selected=APL_med_long$Commune[1]),
-                   downloadLink('downloadData', 'Download')
+                   downloadLink('downloadData', 'Download'),
+                   div("Indicateurs d’accès aux soins (APL) :",
+                     tags$ul(
+                       tags$li("Médecins : nombre de consultations par habitant"),
+                       tags$li("Infirmiers : équivalent temps plein pour 100 000 habitants")
+                     )
+                    )
                  ),
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("offre_besoin_med")
+                   plotOutput("offre_besoin_med"),
+                   plotOutput("offre_besoin_inf")
                  )
                )
             )
@@ -271,7 +281,7 @@ server <- function(input, output) {
         scale_color_discrete(name="Type d'infirmiers")
     })
     
-    # Pour APL
+    # Pour APL med
     output$offre_besoin_med <- renderPlot({
       APL_med_long %>% 
         filter(Commune==input$Commune) %>% 
@@ -279,15 +289,33 @@ server <- function(input, output) {
           geom_col() +
           geom_text(aes(label=round(APL, 2)), vjust=-0.5, size=4) +
           facet_wrap(~annee) +
-          labs(x="Tranche d'âge des médecins",
-          y="Accessibilité potentielle localisée",
-          title=paste("Nombre de consultations par habitants : ", input$Commune)) +
-          scale_fill_discrete(name="Âge des médecins", 
-                              labels=c("APL_60"="Médecins ≤ 60 ans", 
-                                       "APL_65"="Médecins ≤ 65 ans", 
-                                       "APL_62"="Médecins ≤ 62 ans", 
-                                       "APL_tous"="Tous les médecins")) +
+          labs(x="Tranche d'âge des médecins", y="Accessibilité potentielle localisée",
+          title=paste("Nombre de consultations (médecins) par habitant : ", input$Commune)) +
+          scale_fill_manual(name="Âge des médecins", 
+                            values=c("APL_60"="#C7CEEA", 
+                                     "APL_65"="#A2C8F2", 
+                                     "APL_62"="#FFDAC1",
+                                     "APL_tous"="#FFB7B2"),
+                            labels=c("APL_60"="Médecins ≤ 60 ans",
+                                     "APL_62"="Médecins ≤ 62 ans",
+                                     "APL_65"="Médecins ≤ 65 ans", 
+                                     "APL_tous"="Tous les médecins")) +
           theme_bw()
+    })
+    
+    # Pour APL inf
+    output$offre_besoin_inf <- renderPlot({
+      APL_inf %>% 
+        filter(Commune==input$Commune) %>% 
+        ggplot(aes(x=factor(annee), y=APL_infirmiere, fill=factor(annee))) +
+        geom_bar(stat="identity", width=0.6) +
+        geom_text(aes(label=round(APL_infirmiere, 2)), vjust=-0.8, size=4) +
+        labs(y="Accessibilité potentielle localisée", x="Année",
+          title=paste("APL infirmiers : ", input$Commune)) +
+        scale_fill_manual(name="Année",
+          values=c("2022"="#A2C8F2", 
+                   "2023"="#F7C6A3")) +
+        theme_bw()
     })
 
     
