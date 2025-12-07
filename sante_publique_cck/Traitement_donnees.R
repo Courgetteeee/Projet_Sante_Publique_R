@@ -120,6 +120,7 @@ saveRDS(APL_inf, "donnees_traitees/APL_inf.rds")
 
 ## Import et prétraitement des données de Karla --------------------------------
 
+#Fonction pour l'import des données avec extraction des titres
 import_sheet <- function(file, sheet_name) {
   
   # Lire les deux lignes d'en-tête
@@ -168,18 +169,20 @@ import_sheet <- function(file, sheet_name) {
   dat
 }
 
+#Import de toutes les feuilles du fichier
 import_all_sheets <- function(file) {
   sheet_names <- excel_sheets(file)
   map_dfr(sheet_names, ~import_sheet(file, .x))
 }
 
-
+#Utilisation des fonctions sur les données
 morta_dip <- import_all_sheets("donnees_shiny/MORTA_DIP.xlsx")
 morta_dip <- morta_dip %>% filter(Diplme_INDICATEUR != "Âge") %>% rename(age = Diplme_INDICATEUR)
 
 morta_cs <- import_all_sheets("donnees_shiny/MORTA_CS.xlsx")
 morta_cs <- morta_cs %>% filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>% rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
 
+#Pivot des deux tables
 morta_dip <- morta_dip %>%
   mutate(across(contains("Esprancedevielgex"), as.numeric)) %>% 
   pivot_longer(cols = -c(int_annee, sexe, age),

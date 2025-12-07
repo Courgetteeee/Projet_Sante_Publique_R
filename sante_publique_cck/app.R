@@ -143,7 +143,15 @@ ui <- navbarPage("Santé publique sur le territoire",
                               choices=sort(unique(morta_dip$indicateur))),
                   selectInput(inputId="Annees", label="Années :", 
                               choices=sort(unique(morta_dip$int_annee))),
-                  downloadLink('downloadData', 'Download')
+                  downloadLink('downloadData', 'Download'),
+                  div("Indicateurs d’accès aux soins (APL) :",
+                      tags$ul(
+                        tags$li("Quotient de mortalité : Mesure la probabilité à un certain âge, pour les personnes survivantes à cet âge, de décéder avant l'âge suivant."),
+                        tags$li("Esprérance de vie : nombre moyen d'années restant à vivre au-delà de cet âge x"),
+                        tags$li("Survie : Représente le nombre d’individus survivants à l’âge x dans une génération fictive de 100 000 naissances")
+                        
+                      )
+                  )
                 ),
                 mainPanel(
                   plotOutput("mortalite_diplome")
@@ -157,7 +165,15 @@ ui <- navbarPage("Santé publique sur le territoire",
                               choices=sort(unique(morta_cs$indicateur))),
                   selectInput(inputId="Annees_cs", label="Années :", 
                               choices=sort(unique(morta_cs$int_annee))),
-                  downloadLink('downloadData', 'Download')
+                  downloadLink('downloadData', 'Download'),
+                  div("Indicateurs de mortalité :",
+                      tags$ul(
+                        tags$li("Quotient de mortalité : Mesure la probabilité à un certain âge, pour les personnes survivantes à cet âge, de décéder avant l'âge suivant."),
+                        tags$li("Esprérance de vie : nombre moyen d'années restant à vivre au-delà de cet âge x"),
+                        tags$li("Survie : Représente le nombre d’individus survivants à l’âge x dans une génération fictive de 100 000 naissances")
+                        
+                      )
+                  )
                 ),
                 mainPanel(
                   plotOutput("mortalite_classe")
@@ -359,8 +375,26 @@ server <- function(input, output) {
         ggplot() +
         aes(x = age, y = valeur_dip, colour = diplome) +
         geom_line() +
-        scale_color_hue(direction = 1) +
-        labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et du diplome", 
+        scale_color_manual(
+          name = "Diplôme",
+          labels = c(
+            "Baccalauréat",
+            "Brevet / CEP",
+            "CAP / BEP",
+            "Ensemble",
+            "Sans diplôme",
+            "Supérieur au baccalauréat"
+          ),
+          values = c(
+            "Baccalaurat" = "#E41A1C",
+            "BrevetCEP" = "#FFD92F",
+            "CAPBEP" = "#4DAF4A",
+            "Ensemble" = "#34AADD",
+            "Sansdiplme" = "#377EB8",
+            "Suprieuraubaccalaurat" = "#E78AC3"
+          )
+        )+
+        labs(x = "âge", y = input$Indicateur, title = "Indicateur de mortalité en fonction de l'âge et du diplome", 
              color = "Diplôme") +
         facet_wrap(~sexe)+
         theme_minimal()
@@ -376,8 +410,30 @@ server <- function(input, output) {
         ggplot() +
         aes(x = age, y = valeur_cs, colour = classe_sociale) +
         geom_line() +
-        scale_color_brewer(palette = "Set2") +
-        labs(x = "âge", y = "indic...", title = "Indicateur de mortalité en fonction de l'âge et de la classe sociale", 
+        scale_color_manual(
+          name = "Classe sociale",
+          labels = c(
+            "Agriculteurs",
+            "Artisans, commerçants et chefs d’entreprise",
+            "Cadres et professions intellectuelles supérieures",
+            "Employés",
+            "Ensemble",
+            "Inactifs non retraités",
+            "Ouvriers",
+            "Professions intermédiaires"
+          ),
+          values = c(
+            "Agriculteurs" = "#1B9E77",
+            "Artisanscommerantschefsdentreprise" = "#D95F02",
+            "Cadresetprofintellectuellessuperieures" = "#1F78B4",
+            "Employs" = "#E7298A",
+            "Ensemble" = "#66A61E",
+            "Inactifsnonretraits" = "#E6AB02",
+            "Ouvriers" = "#E31A1C",
+            "Professionsintermdiaires" = "#7570B3"
+          )
+        )+
+        labs(x = "âge", y = input$Indicateur_cs, title = "Indicateur de mortalité en fonction de l'âge et de la classe sociale", 
              color = "Classe sociale") +
         facet_wrap(~sexe)+
         theme_minimal()
