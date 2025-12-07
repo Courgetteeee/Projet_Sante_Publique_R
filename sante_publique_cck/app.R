@@ -186,7 +186,7 @@ ui <- navbarPage(
                   selectInput(inputId="Annees_cs", label="Années :", 
                               choices=sort(unique(morta_cs$int_annee))),
                   downloadLink('downloadData_8', 'Télécharger'),
-                  div("Indicateurs de mortalité :",
+                  div("Indicateurs mortalité :",
                       tags$ul(
                         tags$li("Quotient de mortalité : Mesure la probabilité à un certain âge, pour les personnes survivantes à cet âge, de décéder avant l'âge suivant."),
                         tags$li("Esprérance de vie : nombre moyen d'années restant à vivre au-delà de cet âge x"),
