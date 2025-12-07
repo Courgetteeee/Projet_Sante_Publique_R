@@ -91,7 +91,7 @@ ui <- navbarPage(
                    selectInput(inputId="departement2", label="Choisir un département :", 
                                choices=sort(unique(inf_lib_sal$departement)), 
                                selected=inf_lib_sal$departement[1]),
-                   downloadLink('downloadData', 'Download')
+                   downloadLink('downloadData_2', 'Télécharger')
                  ),
                  
                  # Show a plot of the generated distribution
@@ -107,7 +107,9 @@ ui <- navbarPage(
                    selectInput(inputId="Commune", label="Choisir une Commune :", 
                                choices=sort(unique(APL_med_long$Commune)), 
                                selected=APL_med_long$Commune[1]),
-                   downloadLink('downloadData', 'Download'),
+                   downloadLink('downloadData_3', 'Télécharger graphe médecins'),
+                   br(),
+                   downloadLink('downloadData_4', 'Télécharger graphe infirmiers'),
                    div("Indicateurs d’accès aux soins (APL) :",
                      tags$ul(
                        tags$li("Médecins : nombre de consultations par habitant"),
@@ -137,7 +139,7 @@ ui <- navbarPage(
              
      tabPanel("Mortalité Périnatale",
         fluidPage(
-          downloadLink('downloadData', 'Download'),
+          downloadLink('downloadData_5', 'Télécharger'),
           plotOutput("mortalite_peri_reg")%>% withSpinner(color="#667eea")
         )
      ),
@@ -147,7 +149,7 @@ ui <- navbarPage(
                 sidebarPanel(
                   selectInput(inputId="Cause", label="Choisir la cause du décès :", 
                               choices=sort(unique(mortalite_cause$variable))),
-                  downloadLink('downloadData', 'Download')
+                  downloadLink('downloadData_6', 'Télécharger')
                 ),
                 mainPanel(
                   plotOutput("mortalite_cause_bar")%>% withSpinner(color="#667eea")
@@ -161,8 +163,8 @@ ui <- navbarPage(
                               choices=sort(unique(morta_dip$indicateur))),
                   selectInput(inputId="Annees", label="Années :", 
                               choices=sort(unique(morta_dip$int_annee))),
-                  downloadLink('downloadData', 'Download'),
-                  div("Indicateurs d’accès aux soins (APL) :",
+                  downloadLink('downloadData_7', 'Télécharger'),
+                  div("Indicateurs mortalité :",
                       tags$ul(
                         tags$li("Quotient de mortalité : Mesure la probabilité à un certain âge, pour les personnes survivantes à cet âge, de décéder avant l'âge suivant."),
                         tags$li("Esprérance de vie : nombre moyen d'années restant à vivre au-delà de cet âge x"),
@@ -183,7 +185,7 @@ ui <- navbarPage(
                               choices=sort(unique(morta_cs$indicateur))),
                   selectInput(inputId="Annees_cs", label="Années :", 
                               choices=sort(unique(morta_cs$int_annee))),
-                  downloadLink('downloadData', 'Download'),
+                  downloadLink('downloadData_8', 'Télécharger'),
                   div("Indicateurs de mortalité :",
                       tags$ul(
                         tags$li("Quotient de mortalité : Mesure la probabilité à un certain âge, pour les personnes survivantes à cet âge, de décéder avant l'âge suivant."),
@@ -425,19 +427,9 @@ server <- function(input, output) {
     easyClose = TRUE
   ))  
   
-    # Affiche le bouton de téléchargement
-    output$downloadData_1 <- downloadHandler(
-      filename = function() "Effectif_medecin.pdf",
-      content = function(file) {
-        ggsave(file, plot=plot_medecin(), device="pdf")
-      }
-    )
 
   
     #Server de Clara
-    
-    plot_medecin <- reactiveVal(NULL)
-    
     output$effectifs_medecin <- renderPlot({
       
       p <- medecin_long %>% 
@@ -457,7 +449,7 @@ server <- function(input, output) {
     
     # Graphe effectifs infirmiers
     output$effectifs_infirmiers <- renderPlot({
-      inf_lib_sal %>% filter(departement==input$departement2) %>%
+      p<-inf_lib_sal %>% filter(departement==input$departement2) %>%
       ggplot(aes(x=annee, y=effectif, col=data_type)) +
         geom_line() +
         facet_wrap(~data_type, scales="free_y") +
@@ -466,11 +458,14 @@ server <- function(input, output) {
         labs(title="Effectifs par année des infirmiers",
              x="Année", y="Effectif") +
         scale_color_discrete(name="Type d'infirmiers")
+      
+      plot_infirmiers(p)
+      print(p)
     })
     
     # Pour APL med
     output$offre_besoin_med <- renderPlot({
-      APL_med_long %>% 
+      p<-APL_med_long %>% 
         filter(Commune==input$Commune) %>% 
         ggplot(aes(x=age_medecins, y=APL, fill=age_medecins)) +
           geom_col() +
@@ -488,11 +483,14 @@ server <- function(input, output) {
                                      "APL_65"="Médecins ≤ 65 ans", 
                                      "APL_tous"="Tous les médecins")) +
           theme_bw()
+      plot_apl_med(p)
+      print(p)
+      
     })
     
     # Pour APL inf
     output$offre_besoin_inf <- renderPlot({
-      APL_inf %>% 
+      p<-APL_inf %>% 
         filter(Commune==input$Commune) %>% 
         ggplot(aes(x=factor(annee), y=APL_infirmiere, fill=factor(annee))) +
         geom_bar(stat="identity", width=0.6) +
@@ -503,7 +501,66 @@ server <- function(input, output) {
           values=c("2022"="#A2C8F2", 
                    "2023"="#F7C6A3")) +
         theme_bw()
+      plot_apl_inf(p)
+      print(p)
     })
+    
+    ## Téléchargement ##
+    
+    #Téléchargement Graphique effectif medecin
+    plot_medecin <- reactiveVal(NULL)
+    
+    output$downloadData_1 <- downloadHandler(
+      filename = function() "Effectif_medecin.pdf",
+      content = function(file) {
+        ggsave(file, plot=plot_medecin(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement Graphique infirmiers
+    plot_infirmiers <- reactiveVal(NULL)
+    output$downloadData_2 <- downloadHandler(
+      filename = function() "Effectif_infirmiers.pdf",
+      content = function(file) {
+        ggsave(file, plot=plot_infirmiers(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement Graphique APL médecins
+    plot_apl_med  <- reactiveVal(NULL)
+    output$downloadData_3 <- downloadHandler(
+      filename = function() paste0("APL_medecins_",input$Commune,".pdf"),
+      content = function(file) {
+        ggsave(file, plot=plot_apl_med(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement Graphique APL infirmiers
+    plot_apl_inf  <- reactiveVal(NULL)
+    output$downloadData_4 <- downloadHandler(
+      filename = function() paste0("APL_infirmiers_",input$Commune,".pdf"),
+      content = function(file) {
+        ggsave(file, plot=plot_apl_inf (), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    
 
     
     #Server de Karla
@@ -512,7 +569,7 @@ server <- function(input, output) {
     output$mortalite_peri_reg<- renderPlot({
       mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
       
-      ggplot(mortalite_perinatale) +
+      p<-ggplot(mortalite_perinatale) +
         aes(x = Région, y = valeur) +
         geom_segment( aes(x=Région, xend=Région, y=0, yend=valeur), color="grey") +
         geom_point(color="darkorchid3", size = 2)+
@@ -520,11 +577,13 @@ server <- function(input, output) {
              title = "Mortalité périnatale sur 1000 naissances") +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45L, hjust=1))
+      plot_morta_peri(p)
+      print(p)
     })
     
     #Graphe cause mortalité
     output$mortalite_cause_bar <- renderPlot({
-      mortalite_cause%>% filter(variable==input$Cause) %>%
+      p<-mortalite_cause%>% filter(variable==input$Cause) %>%
       ggplot(aes(x = Région, y = valeur)) +
         geom_col(fill = "#ACA3C8") +
         facet_wrap(~sexe)+
@@ -532,11 +591,14 @@ server <- function(input, output) {
              title = "Taux de mortalité standardisé pour 100 000 habitants selon la région") +
         theme_bw() +
         theme(axis.text.x = element_text(angle = 45L, hjust = 1L))
+      
+      plot_morta_cause(p)
+      print(p)
     })
     
     #Graphe mortalité diplome
     output$mortalite_diplome <- renderPlot({
-      morta_dip %>%
+      p<-morta_dip %>%
         filter(int_annee == input$Annees) %>%
         filter(indicateur == input$Indicateur) %>%
         ggplot() +
@@ -565,13 +627,16 @@ server <- function(input, output) {
              color = "Diplôme") +
         facet_wrap(~sexe)+
         theme_minimal()
+      
+      plot_morta_dip(p)
+      print(p)
 
     })
     
     #Graphe mortalité classe sociale
     output$mortalite_classe <- renderPlot({
       
-      morta_cs %>%
+      p<-morta_cs %>%
         filter(int_annee == input$Annees_cs) %>%
         filter(indicateur == input$Indicateur_cs) %>%
         ggplot() +
@@ -605,7 +670,66 @@ server <- function(input, output) {
         facet_wrap(~sexe)+
         theme_minimal()
       
+      plot_morta_cs(p)
+      print(p)
+      
     })
+    
+    ## Téléchargement ##
+    
+    #Téléchargement mortalité périnatale
+    plot_morta_peri   <- reactiveVal(NULL)
+    output$downloadData_5 <- downloadHandler(
+      filename = function() "Mortalite_perinatale.pdf",
+      content = function(file) {
+        ggsave(file, plot=plot_morta_peri(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement mortalité cause
+    plot_morta_cause   <- reactiveVal(NULL)
+    output$downloadData_6 <- downloadHandler(
+      filename = function() paste0("Mortalite_cause_",input$Cause,".pdf"),
+      content = function(file) {
+        ggsave(file, plot=plot_morta_cause(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement mortalité diplome
+    plot_morta_dip    <- reactiveVal(NULL)
+    output$downloadData_7 <- downloadHandler(
+      filename = function() paste0("Mortalite_diplome_",input$Annees,".pdf"),
+      content = function(file) {
+        ggsave(file, plot=plot_morta_dip(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    #Téléchargement mortalité classe sociale
+    plot_morta_cs     <- reactiveVal(NULL)
+    output$downloadData_8 <- downloadHandler(
+      filename = function() paste0("Mortalite_classe_sociale_",input$Annees_cs,".pdf"),
+      content = function(file) {
+        ggsave(file, plot=plot_morta_cs(), device="pdf")
+        
+        #Notification si succès de téléchargement
+        showNotification(
+          "Téléchargement réussi !", type="message",duration=5)
+      }
+    )
+    
+    
     
     #Server de Cindy
     
