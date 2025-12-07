@@ -75,7 +75,7 @@ ui <- navbarPage(
                           selected=medecin_long$departement[1]),
               selectInput(inputId="specialites", label="Choisir une spécialité :", choices=sort(unique(medecin_long$specialites)), 
                           selected=medecin_long$specialites[1]),
-              downloadLink('downloadData', 'Download')
+              downloadLink('downloadData_1', 'Télécharger')
             ),
     
             # Show a plot of the generated distribution
@@ -426,25 +426,34 @@ server <- function(input, output) {
   ))  
   
     # Affiche le bouton de téléchargement
-    output$downloadData <- downloadHandler(filename = function(){
-      paste('data-', Sys.Date(), '.csv', sep='')}, 
-      content = function(con){
-        write.csv(data, con)})
-  
+    output$downloadData_1 <- downloadHandler(
+      filename = function() "Effectif_medecin.pdf",
+      content = function(file) {
+        ggsave(file, plot=plot_medecin(), device="pdf")
+      }
+    )
+
   
     #Server de Clara
     
-    # Graphe effectifs medecins
+    plot_medecin <- reactiveVal(NULL)
+    
     output$effectifs_medecin <- renderPlot({
-      medecin_long %>% filter(departement==input$departement, specialites==input$specialites) %>% 
-      ggplot(aes(x=annee, y=effectif)) +
-        geom_line(color="steelblue", linewidth=1.5) +
-        geom_point(color="steelblue", size=3) +
-        xlab("Année") +
-        ylab("Effectif") +
-        ggtitle("Évolution des effectifs des médecins") +
-        theme_bw()
+      
+      p <- medecin_long %>% 
+        filter(departement==input$departement, specialites==input$specialites) %>% 
+        ggplot(aes(x=annee, y=effectif)) +
+          geom_line(color="steelblue", linewidth=1.5) +
+          geom_point(color="steelblue", size=3) +
+          xlab("Année") +
+          ylab("Effectif") +
+          ggtitle("Évolution des effectifs des médecins") +
+          theme_bw()
+      
+      plot_medecin(p)
+      print(p)
     })
+    
     
     # Graphe effectifs infirmiers
     output$effectifs_infirmiers <- renderPlot({
