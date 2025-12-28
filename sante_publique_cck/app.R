@@ -468,7 +468,7 @@ server <- function(input, output) {
           geom_point(color="steelblue", size=3) +
           xlab("Année") +
           ylab("Effectif") +
-          ggtitle("Évolution des effectifs des médecins") +
+          ggtitle(paste0("Évolution des effectifs des médecins : ", input$departement)) +
           theme_bw()
       
       plot_medecin(p)
@@ -484,7 +484,7 @@ server <- function(input, output) {
         facet_wrap(~data_type, scales="free_y") +
         scale_x_continuous(breaks=unique(inf_lib_sal$annee)) +
         theme_bw() +
-        labs(title="Effectifs par année des infirmiers",
+        labs(title=paste0("Effectifs par année des infirmiers : ", input$departement2),
              x="Année", y="Effectif") +
         scale_color_discrete(name="Type d'infirmiers")
       
@@ -501,7 +501,7 @@ server <- function(input, output) {
           geom_text(aes(label=round(APL, 2)), vjust=-0.5, size=4) +
           facet_wrap(~annee) +
           labs(x="Tranche d'âge des médecins", y="Accessibilité potentielle localisée",
-          title=paste("Nombre de consultations (médecins) par habitant : ", input$Commune)) +
+          title=paste("APL médecins : ", input$Commune)) +
           scale_fill_manual(name="Âge des médecins", 
                             values=c("APL_60"="#C7CEEA", 
                                      "APL_65"="#A2C8F2", 
