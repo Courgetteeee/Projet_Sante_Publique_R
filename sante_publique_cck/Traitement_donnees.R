@@ -20,7 +20,9 @@ medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3"))
 
 medecin_long <- medecin_clean %>% 
   pivot_longer(cols=starts_with("effectif_"), names_to = "annee", values_to = "effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee)))
+  mutate(annee=as.integer(sub("effectif_", "", annee))) %>%
+  mutate(specialites=str_to_title(str_extract(specialites, "(?<=-).*")), 
+         departement=str_to_title(str_extract(departement, "(?<=-).*")))
 
 saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
 
@@ -37,10 +39,9 @@ inf_lib_long <- inf_lib_clean %>%
   mutate(annee=as.integer(sub("effectif_", "", annee))) %>% 
   mutate(departement=str_replace_all(departement, " ", "")) %>% 
   mutate(region=str_replace_all(region, " ", "")) %>% 
-  filter(!annee %in% c(2012, 2022, 2023))
-
-inf_lib_long <- inf_lib_long %>% 
-  mutate(data_type = "Libéraux")
+  filter(!annee %in% c(2012, 2022, 2023)) %>% 
+  mutate(data_type = "Libéraux") %>% 
+  mutate(departement=str_to_title(str_extract(departement, "(?<=-).*")))
 
 saveRDS(inf_lib_long, "donnees_traitees/inf_lib_long.rds")
 
@@ -58,10 +59,9 @@ inf_sal_clean <- inf_sal_clean_names %>%
 
 inf_sal_long <- inf_sal_clean %>% 
   pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee)))
-
-inf_sal_long <- inf_sal_long %>% 
-  mutate(data_type="Salariés")
+  mutate(annee=as.integer(sub("effectif_", "", annee))) %>% 
+  mutate(data_type="Salariés") %>% 
+  mutate(departement=str_to_title(str_extract(departement, "(?<=-).*")))
 
 saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
