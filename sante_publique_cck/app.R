@@ -21,7 +21,20 @@ library(stringr)
 library(tidyr)
 
 # Fonction de téléchargement des graphes
+
+#' Title : download_plot
+#' 
+#' Téchécharge un graphique en pdf, elle gère à la fois un nom de fichier fixe 
+#' ou dynamique et affiche une notification lors du téléchargement.
+#'
+#' @param output l'objet output de shiny
+#' @param input l'objet input de shiny, seulement si nom dynamique
+#' @param output_id caractère : nom de l’élément de sortie shiny
+#' @param plot_name fonction retournant un ggplot à télécharger
+#' @param name_pdf caractère pour un nom fixe, ou fonction pour un nom dynamique
+#'
 download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
+  
   output[[output_id]] <- downloadHandler(
     filename = if (is.function(name_pdf)) {
       function() paste0(name_pdf(input), ".pdf")
@@ -38,6 +51,17 @@ download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
 }
 
 # Fonction de téléchargement des cartes
+
+#' Title : download_map
+#' 
+#' Téchécharge une carte en png et affiche une notification lors du téléchargement.
+#'
+#' @param output l'objet output de shiny
+#' @param input l'objet input de shiny
+#' @param output_id caractère : nom de l’élément de sortie shiny
+#' @param plot_reactive fonction retournant la carte à télécharger
+#' @param prefix caractère : préfixe utilisé pour le nom du fichier
+#' 
 download_map <- function(output, input, output_id, plot_reactive, prefix) {
   output[[output_id]] <- downloadHandler(
     filename = function() {
