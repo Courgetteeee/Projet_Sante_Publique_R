@@ -18,8 +18,8 @@ medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3"))
                                     sexe=="0-Ensemble", departement!="000-Ensemble", exercice == "0-Ensemble",
                                     tranche_age=="00-Ensemble", specialites != "00-Ensemble")
 
-medecin_long <- medecin_clean %>% pivot_longer(cols=starts_with("effectif_"),
-                                               names_to = "annee", values_to = "effectif") %>% 
+medecin_long <- medecin_clean %>% 
+  pivot_longer(cols=starts_with("effectif_"), names_to = "annee", values_to = "effectif") %>% 
   mutate(annee=as.integer(sub("effectif_", "", annee)))
 
 saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
@@ -39,10 +39,10 @@ inf_lib_long <- inf_lib_clean %>%
   mutate(region=str_replace_all(region, " ", "")) %>% 
   filter(!annee %in% c(2012, 2022, 2023))
 
-inf_lib_long <- inf_lib_long %>% mutate(data_type = "Libéraux")
+inf_lib_long <- inf_lib_long %>% 
+  mutate(data_type = "Libéraux")
 
 saveRDS(inf_lib_long, "donnees_traitees/inf_lib_long.rds")
-
 
 # Inf sal
 
@@ -60,7 +60,8 @@ inf_sal_long <- inf_sal_clean %>%
   pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
   mutate(annee=as.integer(sub("effectif_", "", annee)))
 
-inf_sal_long <- inf_sal_long %>% mutate(data_type = "Salariés")
+inf_sal_long <- inf_sal_long %>% 
+  mutate(data_type="Salariés")
 
 saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
@@ -69,21 +70,22 @@ saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet=2, skip=8)
 APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet=3, skip=8)
 
-APL_med_2022_clean <- APL_med_2022 %>% slice(-1) %>% 
-  rename(Code_INSEE=`Code commune INSEE`, APL_tous=`APL aux médecins généralistes`, 
-         APL_65 =`APL aux médecins généralistes de 65 ans et moins`,
-         APL_62=`APL aux médecins généralistes de 62 ans et moins`,
-         APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
-         Pop_tot=`Population totale 2020`,
-         Pop_standardisee_med=`Population standardisée 2020 pour la médecine générale`) %>% mutate(annee=2022)
+# Fonction de nettoyage des tables APL pour médecin
+clean_APL_med <- function(data, annee, annee_pop) {
+  data %>% 
+    slice(-1) %>% 
+    rename(Code_INSEE=`Code commune INSEE`, 
+           APL_tous=`APL aux médecins généralistes`, 
+           APL_65=`APL aux médecins généralistes de 65 ans et moins`,
+           APL_62=`APL aux médecins généralistes de 62 ans et moins`,
+           APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
+           Pop_tot=paste0("Population totale ", annee_pop),
+           Pop_standardisee_med=paste0("Population standardisée ", annee_pop, " pour la médecine générale")) %>% 
+    mutate(annee=annee)
+}
 
-APL_med_2023_clean <- APL_med_2023 %>% slice(-1) %>% 
-  rename(Code_INSEE=`Code commune INSEE`, APL_tous=`APL aux médecins généralistes`, 
-         APL_65 =`APL aux médecins généralistes de 65 ans et moins`,
-         APL_62=`APL aux médecins généralistes de 62 ans et moins`,
-         APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
-         Pop_tot=`Population totale 2021`,
-         Pop_standardisee_med=`Population standardisée 2021 pour la médecine générale`) %>% mutate(annee=2023)
+APL_med_2022_clean <- clean_APL_med(APL_med_2022, annee=2022, annee_pop=2020)
+APL_med_2023_clean <- clean_APL_med(APL_med_2023, annee=2023, annee_pop=2021)
 
 APL_med <- bind_rows(APL_med_2022_clean, APL_med_2023_clean)
 
@@ -100,19 +102,19 @@ saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
 APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet=2, skip=8)
 APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet=3, skip=8)
 
-APL_inf_2022_clean <- APL_inf_2022 %>% slice(-1) %>% 
-  rename(Code_INSEE=`Code commune INSEE`, APL_infirmiere=`APL aux infirmières`, 
-         Pop_standardisee=`Population standardisée 2020 pour les infirmières`,
-         Pop_tot=`Population totale 2020`) %>% mutate(annee=2022) %>% 
-  mutate(Pop_standardisee=as.numeric(Pop_standardisee), 
-         APL_infirmiere=as.numeric(APL_infirmiere))
+# Fonction de nettoyage des tables APL pour inf
+clean_APL_inf <- function(data, annee, annee_pop) {
+  data %>% 
+    slice(-1) %>% 
+    rename(Code_INSEE=`Code commune INSEE`, 
+           APL_infirmiere=`APL aux infirmières`, 
+           Pop_standardisee=paste0("Population standardisée ", annee_pop, " pour les infirmières"),
+           Pop_tot=paste0("Population totale ", annee_pop)) %>% 
+    mutate(annee=annee, Pop_standardisee=as.numeric(Pop_standardisee), APL_infirmiere=as.numeric(APL_infirmiere))
+}
 
-APL_inf_2023_clean <- APL_inf_2023 %>% slice(-1) %>% 
-  rename(Code_INSEE=`Code commune INSEE`, APL_infirmiere=`APL aux infirmières`, 
-         Pop_standardisee=`Population standardisée 2021 pour les infirmières`,
-         Pop_tot=`Population totale 2021`) %>% mutate(annee=2023) %>% 
-  mutate(Pop_standardisee=as.numeric(Pop_standardisee), 
-         APL_infirmiere=as.numeric(APL_infirmiere))
+APL_inf_2022_clean <- clean_APL_inf(APL_inf_2022, annee=2022, annee_pop=2020)
+APL_inf_2023_clean <- clean_APL_inf(APL_inf_2023, annee=2023, annee_pop=2021)
 
 APL_inf <- bind_rows(APL_inf_2022_clean, APL_inf_2023_clean)
 
