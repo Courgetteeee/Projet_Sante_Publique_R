@@ -13,13 +13,12 @@ library(ggplot2)
 library(purrr)
 library(RColorBrewer)
 library(readxl)
-library(shiny)
-library(stringr)
-library(tidyr)
 library(sf)
 library(shiny)
-library(shinythemes)
 library(shinycssloaders)
+library(shinythemes)
+library(stringr)
+library(tidyr)
 
 # Fonction de téléchargement des graphes
 download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
