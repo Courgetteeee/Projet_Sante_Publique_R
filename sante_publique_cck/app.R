@@ -21,6 +21,19 @@ library(shiny)
 library(shinythemes)
 library(shinycssloaders)
 
+# Fonction de téléchargement
+download_plot <- function(output, output_id, plot_reactive, filename_fun) {
+  output$output_id <- downloadHandler(
+    filename = filename_fun,
+    content = function(file) {
+      ggsave(file, plot=plot_reactive(), device="pdf")
+      showNotification("Téléchargement réussi !",
+        type = "message",
+        duration = 5
+      )
+    }
+  )
+}
 
 # Import tables Clara :
 medecin_long <- readRDS("../donnees_traitees/medecin_long.rds")
@@ -507,19 +520,22 @@ server <- function(input, output) {
     
     ## Téléchargement ##
     
-    #Téléchargement Graphique effectif medecin
+    # Téléchargement Graphique effectif medecin
     plot_medecin <- reactiveVal(NULL)
     
-    output$downloadData_1 <- downloadHandler(
-      filename = function() "Effectif_medecin.pdf",
-      content = function(file) {
-        ggsave(file, plot=plot_medecin(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    download_plot(output=output, output_id="downloadData_1",
+      plot_reactive=plot_medecin, filename_fun=function() "Effectif_medecin.pdf")
+    
+    # output$downloadData_1 <- downloadHandler(
+    #   filename = function() "Effectif_medecin.pdf",
+    #   content = function(file) {
+    #     ggsave(file, plot=plot_medecin(), device="pdf")
+    #     
+    #     #Notification si succès de téléchargement
+    #     showNotification(
+    #       "Téléchargement réussi !", type="message",duration=5)
+    #   }
+    # )
     
     #Téléchargement Graphique infirmiers
     plot_infirmiers <- reactiveVal(NULL)
