@@ -21,16 +21,33 @@ library(shiny)
 library(shinythemes)
 library(shinycssloaders)
 
-# Fonction de téléchargement
-download_plot <- function(output, output_id, plot_reactive, filename_fun) {
-  output$output_id <- downloadHandler(
-    filename = filename_fun,
+# Fonction de téléchargement des graphes
+download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
+  output[[output_id]] <- downloadHandler(
+    filename = if (is.function(name_pdf)) {
+      function() paste0(name_pdf(input), ".pdf")
+    } else {
+      function() paste0(name_pdf, ".pdf")
+    },
     content = function(file) {
-      ggsave(file, plot=plot_reactive(), device="pdf")
-      showNotification("Téléchargement réussi !",
-        type = "message",
-        duration = 5
-      )
+      ggsave(file, plot=plot_name(), device="pdf")
+
+      # Notification si succès de téléchargement
+      showNotification("Téléchargement réussi !", type="message", duration=5)
+    }
+  )
+}
+
+# Fonction de téléchargement des cartes
+download_map <- function(output, input, output_id, plot_reactive, prefix) {
+  output[[output_id]] <- downloadHandler(
+    filename = function() {
+      paste0(prefix, "_", input$annee_choisie, "_", Sys.Date(), ".png")
+    },
+    content = function(file) {
+      ggsave(file, plot = plot_reactive())
+
+      showNotification("Téléchargement réussi !", type="message", duration=5)
     }
   )
 }
@@ -518,66 +535,34 @@ server <- function(input, output) {
       print(p)
     })
     
-    ## Téléchargement ##
+    # --------------------------- Téléchargements -------------------------
     
     # Téléchargement Graphique effectif medecin
     plot_medecin <- reactiveVal(NULL)
-    
     download_plot(output=output, output_id="downloadData_1",
-      plot_reactive=plot_medecin, filename_fun=function() "Effectif_medecin.pdf")
+                  plot_name=plot_medecin, name_pdf="Effectif_medecin")
     
-    # output$downloadData_1 <- downloadHandler(
-    #   filename = function() "Effectif_medecin.pdf",
-    #   content = function(file) {
-    #     ggsave(file, plot=plot_medecin(), device="pdf")
-    #     
-    #     #Notification si succès de téléchargement
-    #     showNotification(
-    #       "Téléchargement réussi !", type="message",duration=5)
-    #   }
-    # )
-    
-    #Téléchargement Graphique infirmiers
+    # Téléchargement Graphique effectif infirmier
     plot_infirmiers <- reactiveVal(NULL)
-    output$downloadData_2 <- downloadHandler(
-      filename = function() "Effectif_infirmiers.pdf",
-      content = function(file) {
-        ggsave(file, plot=plot_infirmiers(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    download_plot(output=output, output_id="downloadData_2",
+                  plot_name=plot_infirmiers, name_pdf="Effectif_infirmiers")
     
-    #Téléchargement Graphique APL médecins
+    # Téléchargement Graphique APL médecins
     plot_apl_med  <- reactiveVal(NULL)
-    output$downloadData_3 <- downloadHandler(
-      filename = function() paste0("APL_medecins_",input$Commune,".pdf"),
-      content = function(file) {
-        ggsave(file, plot=plot_apl_med(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    download_plot(output=output, input=input, output_id="downloadData_3",
+                  plot_name=plot_apl_med, 
+                  name_pdf=function(input){
+                    paste0("APL_medecins_", input$Commune)
+                    })
     
-    #Téléchargement Graphique APL infirmiers
+    # Téléchargement Graphique APL infirmiers
     plot_apl_inf  <- reactiveVal(NULL)
-    output$downloadData_4 <- downloadHandler(
-      filename = function() paste0("APL_infirmiers_",input$Commune,".pdf"),
-      content = function(file) {
-        ggsave(file, plot=plot_apl_inf (), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    download_plot(output=output, input=input, output_id="downloadData_4",
+                  plot_name=plot_apl_inf, 
+                  name_pdf=function(input){
+                    paste0("APL_infirmiers_", input$Commune)
+                  })
     
-    
-
     
     #Server de Karla
     
@@ -691,60 +676,36 @@ server <- function(input, output) {
       
     })
     
-    ## Téléchargement ##
+    # --------------------------- Téléchargements -------------------------
     
-    #Téléchargement mortalité périnatale
-    plot_morta_peri   <- reactiveVal(NULL)
-    output$downloadData_5 <- downloadHandler(
-      filename = function() "Mortalite_perinatale.pdf",
-      content = function(file) {
-        ggsave(file, plot=plot_morta_peri(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    # Téléchargement mortalité périnatale
+    plot_morta_peri <- reactiveVal(NULL)
+    download_plot(output=output, output_id="downloadData_5",
+                  plot_name=plot_morta_peri, name_pdf="Mortalite_perinatale")
     
-    #Téléchargement mortalité cause
-    plot_morta_cause   <- reactiveVal(NULL)
-    output$downloadData_6 <- downloadHandler(
-      filename = function() paste0("Mortalite_cause_",input$Cause,".pdf"),
-      content = function(file) {
-        ggsave(file, plot=plot_morta_cause(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    # Téléchargement mortalité cause
+    plot_morta_cause <- reactiveVal(NULL)
+    download_plot(output=output, input=input, output_id="downloadData_6",
+                  plot_name=plot_morta_cause, 
+                  name_pdf=function(input){
+                    paste0("Mortalite_cause_", input$Cause)
+                  })
     
-    #Téléchargement mortalité diplome
-    plot_morta_dip    <- reactiveVal(NULL)
-    output$downloadData_7 <- downloadHandler(
-      filename = function() paste0("Mortalite_diplome_",input$Annees,".pdf"),
-      content = function(file) {
-        ggsave(file, plot=plot_morta_dip(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
+    # Téléchargement mortalité diplome
+    plot_morta_dip <- reactiveVal(NULL)
+    download_plot(output=output, input=input, output_id="downloadData_7",
+                  plot_name=plot_morta_dip, 
+                  name_pdf=function(input){
+                    paste0("Mortalite_diplome_", input$Annees)
+                  })
     
-    #Téléchargement mortalité classe sociale
-    plot_morta_cs     <- reactiveVal(NULL)
-    output$downloadData_8 <- downloadHandler(
-      filename = function() paste0("Mortalite_classe_sociale_",input$Annees_cs,".pdf"),
-      content = function(file) {
-        ggsave(file, plot=plot_morta_cs(), device="pdf")
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Téléchargement réussi !", type="message",duration=5)
-      }
-    )
-    
+    # Téléchargement mortalité classe sociale
+    plot_morta_cs <- reactiveVal(NULL)
+    download_plot(output=output, input=input, output_id="downloadData_8",
+                  plot_name=plot_morta_cs, 
+                  name_pdf=function(input){
+                    paste0("Mortalite_classe_sociale_", input$Annees_cs)
+                  })
     
     
     #Server de Cindy
@@ -879,33 +840,14 @@ server <- function(input, output) {
       tags$div(format(pop, big.mark = " ", scientific = FALSE), style="font-size: 2em;")
     })
     
-    #Téléchargement des cartes
+    # Téléchargement des cartes
     ##Carte france
-    output$download_carte_france <- downloadHandler(
-      filename=function(){
-        paste0("carte_france_apl_",input$annee_choisie,"_",Sys.Date(),".png")},
-      content=function(file) {
-        ggsave(file, plot=plot_france())
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Carte de France téléchargée avec succès !", type="message",duration=5)
+    download_map(output=output, input=input, output_id="download_carte_france",
+      plot_reactive=plot_france, prefix="carte_france_apl")
     
-      }
-    )
-    #Carte régions
-    output$download_carte_region <- downloadHandler(
-      filename=function(){
-        paste0("carte_region_apl_",input$annee_choisie,"_",Sys.Date(),".png")},
-      content=function(file) {
-        ggsave(file, plot=plot_region())
-        
-        #Notification si succès de téléchargement
-        showNotification(
-          "Carte Régionale téléchargée avec succès !", type="message",duration=5)
-      }
-    )
-    
+    ##Carte régions
+    download_map(output=output, input=input, output_id="download_carte_region",
+      plot_reactive=plot_region, prefix="carte_region_apl")
 }
 
 # ---------------------------- GLOBAL -----------------------------------
