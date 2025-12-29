@@ -31,8 +31,6 @@ Projet R Shiny Ravancé - Tableau de bord interactif d'analyse de la santé publ
 -   'sante_publique_cck/app.R' : application Shiny
 -   'sante_publique_cck/Traitement_donnees.R' : traitement et nettoyage de données
 
-....
-
 ## Lancer l'application
 
 ### 1. Cloner le projet ou télécharger les fichiers.
