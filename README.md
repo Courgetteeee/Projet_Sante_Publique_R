@@ -8,9 +8,9 @@ Projet R Shiny Ravancé - Tableau de bord interactif d'analyse de la santé publ
 
 -   Evolution des effectifs de médecins et infirmiers par département et spécialité (2012-2025).
 -   Analyse de l'Accessibilité Potentielle Localisée (APL) par commune.
--   Décalage entre offre et besoin de soins.
+-   Décalage entre l'offre et le besoin de soins.
 
-### Onglet 2 : Etudes de la mortalité
+### Onglet 2 : Etude de la mortalité
 
 -   Mortalité périnatale par région.
 -   Causes de décès standardisées par sexe.
@@ -39,7 +39,7 @@ Projet R Shiny Ravancé - Tableau de bord interactif d'analyse de la santé publ
 
 ### 2. Installer les packages nécessaires
 
-```{r}
+``` r
 install.packages(c("shiny", "shinythemes", "shinycssloaders",
   "dplyr", "ggplot2", "tidyr", "purrr", "stringr",
   "readxl", "sf", "RColorBrewer"))
@@ -55,7 +55,9 @@ Ou cliquer sur **"Run App"** dans RStudio.
 
 ## Données
 
-Les données proviennent de la plateforme officielle data.gouv.fr dans le cadre du défie "Santé et territoires" : [Plateforme officielle defis.data.gouv.fr - Santé et territoires](https://defis.data.gouv.fr/defis/sante-et-territoires)
+Les données proviennent de la plateforme officielle data.gouv.fr dans le cadre du défi "Santé et territoires" :
+
+[Plateforme officielle defis.data.gouv.fr - Santé et territoires](https://defis.data.gouv.fr/defis/sante-et-territoires)
 
 ## Auteurs
 
