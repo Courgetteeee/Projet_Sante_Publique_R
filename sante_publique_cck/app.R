@@ -375,7 +375,7 @@ ui <- navbarPage(
           #Colonne de droite : carte
           column(width=7,
                  h4("Carte par région", style="font-size: 2.2em;text-align: center;"),
-                 plotOutput("carte_region_gener", height = "600px")%>% withSpinner(color="#667eea")
+                 leafletOutput("carte_region_gener", height = "600px")%>% withSpinner(color="#667eea")
           )
         )
       ),
@@ -391,7 +391,7 @@ ui <- navbarPage(
           #Carte à gauche
           column(width=8,
                  h4("Carte de la France", style= "font-size: 2.4em;text-align: center;"),
-                 plotOutput("carte_france_gener", height = "600px") %>% withSpinner(color="#667eea")
+                 leafletOutput("carte_france_gener", height = "600px") %>% withSpinner(color="#667eea")
           ),
           
           
@@ -744,6 +744,29 @@ server <- function(input, output) {
     
     
     ###### Carte France entière
+    output$carte_france_gener <- renderLeaflet({
+      
+      #Filtrer les données
+      region_data <- regions_filtre_apl_gener()
+      #Palette de couleurs
+      pal <- colorNumeric(palette = "magma", domain= region_data$apl_moyen, reverse=FALSE)
+      #Calcul la bounding box (pour centrer la carte)
+      b <- st_bbox(region_data)
+      
+      #Création de la carte
+      leaflet(region_data) %>%
+        #Centrer la carte
+        setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
+                zoom = 6) %>%
+        #Ajout des polygones des régions avec couleurs
+        addPolygons( fillColor = ~pal(apl_moyen), weight=1,color = "white",
+                     fillOpacity = 0.8,
+                     label = ~paste0(reg_name, " : APL ", round(apl_moyen, 2)) %>% lapply(htmltools::HTML)) %>%
+        addLegend("bottomright",pal=pal, values=~apl_moyen, title="APL moyen")
+    })
+    
+    
+    ##Version téléchargement
     #Plot réactif (calculé une seule fois)
     plot_france <- reactive({
       ggplot(regions_filtre_apl_gener())+
@@ -755,10 +778,7 @@ server <- function(input, output) {
               subtitle = "Médecins généralistes")
     })
     
-    #output carte france
-    output$carte_france_gener <- renderPlot ({
-      plot_france()
-    })
+
     
     #INDICATEUR 2.1 APL moyen France
     output$apl_moyen_france <- renderUI({
@@ -796,7 +816,35 @@ server <- function(input, output) {
     })
     
     
-    ####### Carte REGION séléctionné
+    
+    
+    ####### Carte REGION sélectionnée
+    output$carte_region_gener <- renderLeaflet({
+      
+      #Filtrer les données
+      toutes_regions <- regions_filtre_apl_gener()
+      region_filtree <- communes_filtre_apl_gener2() %>% filter(reg_name == input$region_choisie)
+      #Palette de couleurs
+      pal <- colorNumeric(palette = "magma", domain= region_filtree$apl_generalistes, reverse=FALSE)
+      #Calcul la bounding box (pour centrer la carte)
+      b <- st_bbox(region_filtree)
+      
+      #Création de la carte
+      leaflet() %>%
+        #Centrer la carte
+        setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
+                zoom = 8) %>%
+        #Ajouter un fond grisé avec toutes les régions
+        addPolygons( data = toutes_regions, fillColor = "#f0f0f1", weight=1, color="#999",
+                     fillOpacity = 0.3) %>%
+        #Ajout des polygones des régions avec couleurs
+        addPolygons( data = region_filtree, fillColor = ~pal(apl_generalistes), weight=0.5,color = "white",
+                     fillOpacity = 0.9,
+                     label = ~paste0(com_name, " : APL ", round(apl_generalistes, 2)) %>% lapply(htmltools::HTML)) %>%
+        addLegend("bottomright",pal=pal, values=region_filtree$apl_generalistes, title="APL")
+    })
+    
+    
     #Graphique réactif (calculé que une fois)
     plot_region <- reactive({
       region_filtree <- communes_filtre_apl_gener2() %>%
@@ -811,10 +859,6 @@ server <- function(input, output) {
               subtitle = paste0("Médecins généralistes ", input$annee_choisie))
     })
     
-    #Plot de la carte
-    output$carte_region_gener <- renderPlot({
-      plot_region()
-    })
     
     #INDICATEUR 1.1 Classement de la région select
     output$classement_region <- renderUI({
