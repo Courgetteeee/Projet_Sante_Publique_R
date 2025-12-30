@@ -178,10 +178,10 @@ import_all_sheets <- function(file) {
 }
 
 #Utilisation des fonctions sur les données
-morta_dip <- import_all_sheets("donnees_shiny/MORTA_DIP.xlsx")
+morta_dip <- import_all_sheets("data/MORTA_DIP.xlsx")
 morta_dip <- morta_dip %>% filter(Diplme_INDICATEUR != "Âge") %>% rename(age = Diplme_INDICATEUR)
 
-morta_cs <- import_all_sheets("donnees_shiny/MORTA_CS.xlsx")
+morta_cs <- import_all_sheets("data/MORTA_CS.xlsx")
 morta_cs <- morta_cs %>% filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>% rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
 
 #Pivot des deux tables
@@ -213,14 +213,14 @@ morta_cs <- morta_cs %>%
 
 
 # Lecture des 2 premières lignes pour récupérer les variables et le sexe
-headers <- read_excel("donnees_shiny/FET2021-28.xlsx", n_max = 2, col_names = FALSE)
+headers <- read_excel("data/FET2021-28.xlsx", n_max = 2, col_names = FALSE)
 header1 <- headers[1, ] %>% unlist()  # noms des variables
 header1 <- fill(data.frame(header1), header1)$header1
 
 sexe_code <- headers[2, ] %>% unlist() # H ou F
 
 # Lecture des données en sautant les 2 premières lignes
-dat <- read_excel("donnees_shiny/FET2021-28.xlsx", skip = 2, col_names = FALSE)
+dat <- read_excel("data/FET2021-28.xlsx", skip = 2, col_names = FALSE)
 
 # Création des noms uniques
 colnames_unique <- paste0(header1, "_", sexe_code)
