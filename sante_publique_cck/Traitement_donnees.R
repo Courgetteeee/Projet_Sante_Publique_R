@@ -9,6 +9,51 @@ library(sf)
 
 ## Import et prétraitement des données de Clara --------------------------------
 
+# Fonction de nettoyage des tables APL pour médecin
+
+#' Title : clean_APL_med
+#' 
+#' Cette fonction structure et renomme les colonnes principales d'une table APL médecin selon l'année,
+#' elle ajoute également une colonne correspondant à l'année.
+#'
+#' @param data dataframe contenant les données
+#' @param annee entier correspondant à l'année dont les données sont issues
+#' @param annee_pop entier correspondant à l'année utilisée dans la variable Population standardisée
+#'
+clean_APL_med <- function(data, annee, annee_pop) {
+  data %>% 
+    slice(-1) %>% 
+    rename(Code_INSEE=`Code commune INSEE`, 
+           APL_tous=`APL aux médecins généralistes`, 
+           APL_65=`APL aux médecins généralistes de 65 ans et moins`,
+           APL_62=`APL aux médecins généralistes de 62 ans et moins`,
+           APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
+           Pop_tot=paste0("Population totale ", annee_pop),
+           Pop_standardisee_med=paste0("Population standardisée ", annee_pop, " pour la médecine générale")) %>% 
+    mutate(annee=annee)
+}
+
+# Fonction de nettoyage des tables APL pour inf
+
+#' Title : clean_APL_inf
+#' 
+#' Cette fonction structure et renomme les colonnes principales d'une table APL infirmières selon l'année,
+#' elle ajoute également une colonne correspondant à l'année et convertit certaines variable en numérique.
+#'
+#' @param data dataframe contenant les données
+#' @param annee entier correspondant à l'année dont les données sont issues
+#' @param annee_pop entier correspondant à l'année utilisée dans la variable Population standardisée
+#'
+clean_APL_inf <- function(data, annee, annee_pop) {
+  data %>% 
+    slice(-1) %>% 
+    rename(Code_INSEE=`Code commune INSEE`, 
+           APL_infirmiere=`APL aux infirmières`, 
+           Pop_standardisee=paste0("Population standardisée ", annee_pop, " pour les infirmières"),
+           Pop_tot=paste0("Population totale ", annee_pop)) %>% 
+    mutate(annee=annee, Pop_standardisee=as.numeric(Pop_standardisee), APL_infirmiere=as.numeric(APL_infirmiere))
+}
+
 # Medecin
 
 medecin<-read_excel("data/Med_2012_2025.xlsx", sheet=2)
@@ -70,20 +115,6 @@ saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet=2, skip=8)
 APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet=3, skip=8)
 
-# Fonction de nettoyage des tables APL pour médecin
-clean_APL_med <- function(data, annee, annee_pop) {
-  data %>% 
-    slice(-1) %>% 
-    rename(Code_INSEE=`Code commune INSEE`, 
-           APL_tous=`APL aux médecins généralistes`, 
-           APL_65=`APL aux médecins généralistes de 65 ans et moins`,
-           APL_62=`APL aux médecins généralistes de 62 ans et moins`,
-           APL_60=`APL aux médecins généralistes de 60 ans et moins`, 
-           Pop_tot=paste0("Population totale ", annee_pop),
-           Pop_standardisee_med=paste0("Population standardisée ", annee_pop, " pour la médecine générale")) %>% 
-    mutate(annee=annee)
-}
-
 APL_med_2022_clean <- clean_APL_med(APL_med_2022, annee=2022, annee_pop=2020)
 APL_med_2023_clean <- clean_APL_med(APL_med_2023, annee=2023, annee_pop=2021)
 
@@ -101,17 +132,6 @@ saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
 
 APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet=2, skip=8)
 APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet=3, skip=8)
-
-# Fonction de nettoyage des tables APL pour inf
-clean_APL_inf <- function(data, annee, annee_pop) {
-  data %>% 
-    slice(-1) %>% 
-    rename(Code_INSEE=`Code commune INSEE`, 
-           APL_infirmiere=`APL aux infirmières`, 
-           Pop_standardisee=paste0("Population standardisée ", annee_pop, " pour les infirmières"),
-           Pop_tot=paste0("Population totale ", annee_pop)) %>% 
-    mutate(annee=annee, Pop_standardisee=as.numeric(Pop_standardisee), APL_infirmiere=as.numeric(APL_infirmiere))
-}
 
 APL_inf_2022_clean <- clean_APL_inf(APL_inf_2022, annee=2022, annee_pop=2020)
 APL_inf_2023_clean <- clean_APL_inf(APL_inf_2023, annee=2023, annee_pop=2021)

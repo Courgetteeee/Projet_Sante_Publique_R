@@ -10,6 +10,7 @@
 # Les packages
 library(dplyr)
 library(ggplot2)
+library(leaflet)
 library(purrr)
 library(RColorBrewer)
 library(readxl)
