@@ -650,7 +650,7 @@ server <- function(input, output) {
         labs(x = "âge", y = input$Indicateur, title = "Indicateur de mortalité en fonction de l'âge et du diplome", 
              color = "Diplôme") +
         facet_wrap(~sexe)+
-        theme_minimal()
+        theme_bw()
       
       plot_morta_dip(p)
       print(p)
@@ -692,7 +692,7 @@ server <- function(input, output) {
         labs(x = "âge", y = input$Indicateur_cs, title = "Indicateur de mortalité en fonction de l'âge et de la classe sociale", 
              color = "Classe sociale") +
         facet_wrap(~sexe)+
-        theme_minimal()
+        theme_bw()
       
       plot_morta_cs(p)
       print(p)
@@ -749,7 +749,7 @@ server <- function(input, output) {
         geom_sf(aes(fill=apl_moyen), color ="black", size=0.1)+
         scale_fill_viridis_c( option = "magma",
                               name = "APL moyen")+
-        theme_minimal()+
+        theme_bw()+
         labs( title = "APL moyen par région",
               subtitle = "Médecins généralistes")
     })
@@ -805,7 +805,7 @@ server <- function(input, output) {
       ggplot(region_filtree)+
         geom_sf( aes(fill = apl_generalistes), color=NA)+
         scale_fill_viridis_c(option = "magma", name = "APL")+
-        theme_minimal()+
+        theme_bw()+
         labs( title = paste("APL par commune -", input$region_choisie),
               subtitle = paste0("Médecins généralistes ", input$annee_choisie))
     })
