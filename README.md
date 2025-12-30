@@ -27,7 +27,6 @@ Projet R Shiny Ravancé - Tableau de bord interactif d'analyse de la santé publ
 
 -   'data/' : données brutes (non modifiées)
 -   'donnees_traitees/' : données traitées (.rds)
--   'donnees_shiny/' : données traitées
 -   'sante_publique_cck/app.R' : application Shiny
 -   'sante_publique_cck/Traitement_donnees.R' : traitement et nettoyage de données
 
