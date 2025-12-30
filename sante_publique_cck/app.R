@@ -614,7 +614,8 @@ server <- function(input, output) {
         labs(y = "taux de mortalité", 
              title = "Taux de mortalité standardisé pour 100 000 habitants selon la région") +
         theme_bw() +
-        theme(axis.text.x = element_text(angle = 45L, hjust = 1L))
+        theme(axis.text.x = element_text(angle = 45L, hjust = 1L),
+              plot.margin = margin(t = 10, r = 10, b = 30 , l = 30))
       
       plot_morta_cause(p)
       print(p)
