@@ -130,6 +130,14 @@ import_all_sheets <- function(file) {
 ## Fonctions de Cindy ---------------------------------------
 
 #Lecture et preparation des données
+
+#' Title : charger_apl_medecin_annee
+#'
+#' Cette fonction lit les données APL depuis un fichier Excel,
+#' nettoie les colonnes et ajoute l'année correspondante.
+#'
+#' @param annee Année d'intérêt (numérique).
+#'
 charger_apl_medecin_annee <- function(annee){
   df <- read_excel(
     "data/Indicateur d'accessibilité potentielle localisée (APL) aux médecins généralistes.xlsx",
