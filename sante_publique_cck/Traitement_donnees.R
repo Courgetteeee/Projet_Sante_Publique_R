@@ -142,6 +142,19 @@ saveRDS(APL_inf, "donnees_traitees/APL_inf.rds")
 
 ## Import et prétraitement des données de Karla --------------------------------
 
+
+#' Importer une feuille Excel avec en-têtes sur deux lignes
+#'
+#' Cette fonction lit une feuille Excel dont les deux premières lignes
+#' correspondent aux en-têtes, les fusionne, puis importe les données.
+#' Elle extrait également des informations (sexe et période) à partir
+#' du nom de la feuille.
+#'
+#' @param file Chemin vers le fichier Excel.
+#' @param sheet_name Nom de la feuille à importer.
+#'
+#' @return Un data.frame contenant les données importées avec les
+#' colonnes supplémentaires `sexe` et `int_annee`.
 #Fonction pour l'import des données avec extraction des titres
 import_sheet <- function(file, sheet_name) {
   
@@ -191,11 +204,22 @@ import_sheet <- function(file, sheet_name) {
   dat
 }
 
-#Import de toutes les feuilles du fichier
+
+
+#' Importer toutes les feuilles d'un fichier Excel
+#'
+#' Cette fonction importe l'ensemble des feuilles d'un fichier Excel
+#' en utilisant la fonction `import_sheet()` et les assemble en un seul
+#' data.frame.
+#'
+#' @param file Chemin vers le fichier Excel.
+#'
+#' @return Un data.frame contenant les données de toutes les feuilles.
 import_all_sheets <- function(file) {
   sheet_names <- excel_sheets(file)
   map_dfr(sheet_names, ~import_sheet(file, .x))
 }
+
 
 #Utilisation des fonctions sur les données
 morta_dip <- import_all_sheets("data/MORTA_DIP.xlsx")
