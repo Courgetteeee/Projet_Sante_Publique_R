@@ -21,60 +21,8 @@ library(shinythemes)
 library(stringr)
 library(tidyr)
 
-# Fonction de téléchargement des graphes
+source("fonctions.R")
 
-#' Title : download_plot
-#' 
-#' Téchécharge un graphique en pdf, elle gère à la fois un nom de fichier fixe 
-#' ou dynamique et affiche une notification lors du téléchargement.
-#'
-#' @param output l'objet output de shiny
-#' @param input l'objet input de shiny, seulement si nom dynamique
-#' @param output_id caractère : nom de l’élément de sortie shiny
-#' @param plot_name fonction retournant un ggplot à télécharger
-#' @param name_pdf caractère pour un nom fixe, ou fonction pour un nom dynamique
-#'
-download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
-  
-  output[[output_id]] <- downloadHandler(
-    filename = if (is.function(name_pdf)) {
-      function() paste0(name_pdf(input), ".pdf")
-    } else {
-      function() paste0(name_pdf, ".pdf")
-    },
-    content = function(file) {
-      ggsave(file, plot=plot_name(), device="pdf")
-
-      # Notification si succès de téléchargement
-      showNotification("Téléchargement réussi !", type="message", duration=5)
-    }
-  )
-}
-
-# Fonction de téléchargement des cartes
-
-#' Title : download_map
-#' 
-#' Téchécharge une carte en png et affiche une notification lors du téléchargement.
-#'
-#' @param output l'objet output de shiny
-#' @param input l'objet input de shiny
-#' @param output_id caractère : nom de l’élément de sortie shiny
-#' @param plot_reactive fonction retournant la carte à télécharger
-#' @param prefix caractère : préfixe utilisé pour le nom du fichier
-#' 
-download_map <- function(output, input, output_id, plot_reactive, prefix) {
-  output[[output_id]] <- downloadHandler(
-    filename = function() {
-      paste0(prefix, "_", input$annee_choisie, "_", Sys.Date(), ".png")
-    },
-    content = function(file) {
-      ggsave(file, plot = plot_reactive())
-
-      showNotification("Téléchargement réussi !", type="message", duration=5)
-    }
-  )
-}
 
 # Import tables Clara :
 medecin_long <- readRDS("../donnees_traitees/medecin_long.rds")
