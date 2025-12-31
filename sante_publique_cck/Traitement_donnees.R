@@ -3,9 +3,8 @@ library(dplyr)
 library(purrr)
 library(readxl)
 library(stringr)
-library(tidyr)
 library(sf)
-
+library(tidyr)
 
 ## Import et prétraitement des données de Clara --------------------------------
 
