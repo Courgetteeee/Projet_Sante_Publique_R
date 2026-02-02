@@ -106,25 +106,39 @@ ui <- navbarPage(
       tabPanel("Décalage entre l’offre et le besoin de soins",
                sidebarLayout(
                  sidebarPanel(
+                   wellPanel(
+                     style="margin-bottom:5px;",
+                     icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
+                     strong("Qu'est ce que l'APL ? "),
+                     "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins/infirmiers et
+                      la demande de soins sur un territoire. Plus l'APL est élevé, meilleure est l'accessibilité."
+                   ),
                    selectInput(inputId="Commune", label="Choisir une Commune :", 
                                choices=sort(unique(APL_med_long$Commune)), 
                                selected=APL_med_long$Commune[1]),
                    downloadLink('downloadData_3', 'Télécharger graphe médecins'),
                    br(),
                    downloadLink('downloadData_4', 'Télécharger graphe infirmiers'),
+                   br(), br(),
+                   
                    div("Indicateurs d’accès aux soins (APL) :",
                      tags$ul(
                        tags$li("Médecins : nombre de consultations par habitant"),
                        tags$li("Infirmiers : équivalent temps plein pour 100 000 habitants")
                      )
                   ),
-                 
-                 wellPanel(
-                   icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
-                   strong("Qu'est ce que l'APL ? "),
-                   "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins et
-                      la demande de soins sur un territoire. Plus l'APL est élevé, meilleure est l'accessibilité."
-                   )
+                  
+                  tags$div(
+                    style="background-color:#2BC4A3; color:white; padding:15px; border-radius:8px; margin-bottom:10px; text-align:center;",
+                    strong("APL moyen médecins : "), 
+                    span(textOutput("APL_moyen_med", inline=TRUE), style="font-size:18px; font-weight:bold;")
+                  ),
+                  
+                  tags$div(
+                    style="background-color:#2BC4A3; color:white; padding:15px; border-radius:8px; margin-bottom:10px; text-align:center;",
+                    strong("APL moyen infirmiers : "), 
+                    span(textOutput("APL_moyen_inf", inline=TRUE), style="font-size:18px; font-weight:bold;")
+                  )
                  ),
                  
                  # Show a plot of the generated distribution
@@ -138,7 +152,7 @@ ui <- navbarPage(
         )
     ),
   
-  #UI de Karla
+  # UI de Karla
   tabPanel(title = tagList(icon("heartbeat",
                                 style = "font-size: 2em; margin-right:10px;"),
                            "Études de la mortalité sur le territoire"
@@ -477,28 +491,29 @@ server <- function(input, output) {
     
     # Pour APL med
     output$offre_besoin_med <- renderPlot({
-      p<-APL_med_long %>% 
-        filter(Commune==input$Commune) %>% 
+      p<-APL_med_long %>%
+        filter(Commune==input$Commune) %>%
         ggplot(aes(x=age_medecins, y=APL, fill=age_medecins)) +
           geom_col() +
           geom_text(aes(label=round(APL, 2)), vjust=-0.5, size=4) +
           facet_wrap(~annee) +
           labs(x="Tranche d'âge des médecins", y="Accessibilité potentielle localisée",
           title=paste("APL médecins : ", input$Commune)) +
-          scale_fill_manual(name="Âge des médecins", 
-                            values=c("APL_60"="#C7CEEA", 
-                                     "APL_65"="#A2C8F2", 
+          scale_fill_manual(name="Âge des médecins",
+                            values=c("APL_60"="#C7CEEA",
+                                     "APL_65"="#A2C8F2",
                                      "APL_62"="#FFDAC1",
                                      "APL_tous"="#FFB7B2"),
                             labels=c("APL_60"="Médecins ≤ 60 ans",
                                      "APL_62"="Médecins ≤ 62 ans",
-                                     "APL_65"="Médecins ≤ 65 ans", 
+                                     "APL_65"="Médecins ≤ 65 ans",
                                      "APL_tous"="Tous les médecins")) +
           theme_bw()
       plot_apl_med(p)
       print(p)
-      
+
     })
+    
     
     # Pour APL inf
     output$offre_besoin_inf <- renderPlot({
@@ -515,6 +530,24 @@ server <- function(input, output) {
         theme_bw()
       plot_apl_inf(p)
       print(p)
+    })
+    
+    # APL moyen médecins
+    output$APL_moyen_med <- renderText({
+      mean_val <- APL_med_long %>%
+        summarise(moy=mean(APL, na.rm=TRUE)) %>%
+        pull(moy)
+      
+      paste0(round(mean_val, 2))
+    })
+    
+    # APL moyen infirmiers
+    output$APL_moyen_inf <- renderText({
+      mean_val <- APL_inf %>%
+        summarise(moy=mean(APL_infirmiere, na.rm=TRUE)) %>%
+        pull(moy)
+      
+      paste0(round(mean_val, 2))
     })
     
     # --------------------------- Téléchargements -------------------------
