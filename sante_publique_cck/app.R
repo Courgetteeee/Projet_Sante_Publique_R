@@ -53,7 +53,7 @@ ui <- navbarPage(
   "Santé publique sur le territoire",
   theme = shinytheme("flatly"),
   
-  #Titre onglet interractif
+  # Titre onglet interractif
   tags$head(
     tags$style(HTML("
                     .navbar-default .navbar-nav > li > a:hover, .nav-tabs > li > a:hover{

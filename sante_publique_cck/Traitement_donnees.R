@@ -7,6 +7,7 @@ library(tidyr)
 
 source("fonctions.R")
 
+
 ## Import et prétraitement des données de Clara --------------------------------
 
 # Medecin
