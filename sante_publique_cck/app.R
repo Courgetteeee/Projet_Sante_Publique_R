@@ -73,8 +73,8 @@ ui <- navbarPage(
       tabPanel("Evolution des effectifs chez les medecins",
         sidebarLayout(
             sidebarPanel(
-              selectInput(inputId="departement", label="Choisir un département :", choices=sort(unique(medecin_long$departement)), 
-                          selected=medecin_long$departement[1]),
+              selectInput(inputId="departement", label="Choisir un ou plusieurs département :", choices=sort(unique(medecin_long$departement)), 
+                          selected=medecin_long$departement[1], multiple=TRUE),
               selectInput(inputId="specialites", label="Choisir une spécialité :", choices=sort(unique(medecin_long$specialites)), 
                           selected=medecin_long$specialites[1]),
               downloadLink('downloadData_1', 'Télécharger')
@@ -90,9 +90,9 @@ ui <- navbarPage(
       tabPanel("Evolution des effectifs chez les infirmiers",
                sidebarLayout(
                  sidebarPanel(
-                   selectInput(inputId="departement2", label="Choisir un département :", 
+                   selectInput(inputId="departement2", label="Choisir un ou plusieurs département :", 
                                choices=sort(unique(inf_lib_sal$departement)), 
-                               selected=inf_lib_sal$departement[1]),
+                               selected=inf_lib_sal$departement[1], multiple=TRUE),
                    downloadLink('downloadData_2', 'Télécharger')
                  ),
                  
@@ -117,7 +117,14 @@ ui <- navbarPage(
                        tags$li("Médecins : nombre de consultations par habitant"),
                        tags$li("Infirmiers : équivalent temps plein pour 100 000 habitants")
                      )
-                    )
+                  ),
+                 
+                 wellPanel(
+                   icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
+                   strong("Qu'est ce que l'APL ? "),
+                   "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins et
+                      la demande de soins sur un territoire. Plus l'APL est élevé, meilleure est l'accessibilité."
+                   )
                  ),
                  
                  # Show a plot of the generated distribution
@@ -128,7 +135,7 @@ ui <- navbarPage(
                )
             )
       
-      )
+        )
     ),
   
   #UI de Karla
@@ -426,40 +433,43 @@ server <- function(input, output) {
     "Bienvenue sur notre tableau de bord de santé publique. Explorez les données sur 
     l'offre de soins, la mortalité et l'accessiblité aux médecins en France.",
     footer=modalButton("Explorer !"),
-    easyClose = TRUE
+    easyClose=TRUE
   ))  
-  
 
   
-    #Server de Clara
+    # Server de Clara
     output$effectifs_medecin <- renderPlot({
       
-      p <- medecin_long %>% 
-        filter(departement==input$departement, specialites==input$specialites) %>% 
-        ggplot(aes(x=annee, y=effectif)) +
-          geom_line(color="steelblue", linewidth=1.5) +
-          geom_point(color="steelblue", size=3) +
-          xlab("Année") +
-          ylab("Effectif") +
-          ggtitle(paste0("Évolution des effectifs des médecins : ", input$departement)) +
-          theme_bw()
+      p <- medecin_long %>%
+        filter(departement %in% input$departement, specialites==input$specialites) %>%
+        ggplot(aes(x=annee, y=effectif, color=departement)) +
+        geom_line(linewidth=1.5) +
+        geom_point(size=3) +
+        xlab("Année") +
+        ylab("Effectif") +
+        ggtitle(paste0("Évolution des effectifs des médecins de spécialité : ",
+                       input$specialites)) +
+        theme_bw() +
+        labs(color="Département") +
+        scale_color_viridis_d(option="magma", begin=0.3, end=0.85)
       
       plot_medecin(p)
       print(p)
     })
-    
+
     
     # Graphe effectifs infirmiers
     output$effectifs_infirmiers <- renderPlot({
-      p<-inf_lib_sal %>% filter(departement==input$departement2) %>%
-      ggplot(aes(x=annee, y=effectif, col=data_type)) +
+      p <- inf_lib_sal %>% filter(departement %in% input$departement2) %>%
+      ggplot(aes(x=annee, y=effectif, col=departement)) +
         geom_line() +
         facet_wrap(~data_type, scales="free_y") +
         scale_x_continuous(breaks=unique(inf_lib_sal$annee)) +
         theme_bw() +
-        labs(title=paste0("Effectifs par année des infirmiers : ", input$departement2),
+        labs(title="Effectifs par année des infirmiers",
              x="Année", y="Effectif") +
-        scale_color_discrete(name="Type d'infirmiers")
+        scale_color_discrete(name="Département") +
+        scale_color_viridis_d(option="magma", begin=0.3, end=0.85)
       
       plot_infirmiers(p)
       print(p)

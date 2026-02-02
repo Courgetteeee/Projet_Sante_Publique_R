@@ -1,8 +1,5 @@
 
-
 ## Fonctions de Clara -------------------------------------------
-
-# Fonction de nettoyage des tables APL pour médecin
 
 #' Title : clean_APL_med
 #' 
@@ -25,9 +22,6 @@ clean_APL_med <- function(data, annee, annee_pop) {
            Pop_standardisee_med=paste0("Population standardisée ", annee_pop, " pour la médecine générale")) %>% 
     mutate(annee=annee)
 }
-
-
-# Fonction de nettoyage des tables APL pour inf
 
 #' Title : clean_APL_inf
 #' 
@@ -111,7 +105,6 @@ import_sheet <- function(file, sheet_name) {
 }
 
 
-
 #' Title : import_all_sheets
 #'
 #' Cette fonction importe l'ensemble des feuilles d'un fichier Excel
@@ -128,8 +121,6 @@ import_all_sheets <- function(file) {
 
 
 ## Fonctions de Cindy ---------------------------------------
-
-#Lecture et preparation des données
 
 #' Title : charger_apl_medecin_annee
 #'
@@ -162,8 +153,6 @@ charger_apl_medecin_annee <- function(annee){
 
 ## Fonctions de téléchargement -------------------------
 
-# Fonction de téléchargement des graphes
-
 #' Title : download_plot
 #' 
 #' Téchécharge un graphique en pdf, elle gère à la fois un nom de fichier fixe 
@@ -191,9 +180,6 @@ download_plot <- function(output, input=NULL, output_id, plot_name, name_pdf) {
     }
   )
 }
-
-
-# Fonction de téléchargement des cartes
 
 #' Title : download_map
 #' 
