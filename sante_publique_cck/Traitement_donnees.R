@@ -12,93 +12,103 @@ source("fonctions.R")
 
 # Medecin
 
-medecin<-read_excel("data/Med_2012_2025.xlsx", sheet=2)
+medecin <- read_excel("data/Med_2012_2025.xlsx", sheet = 2)
 
 # Suppression des lignes correspondant à des agrégats "Ensemble" afin de ne conserver que les catégories détaillées
-medecin_clean <- medecin %>% filter(!(substr(territoire, 1, 1) %in% c("0", "3")), region!="00-Ensemble", 
-                                    sexe=="0-Ensemble", departement!="000-Ensemble", exercice=="0-Ensemble",
-                                    tranche_age=="00-Ensemble", specialites!="00-Ensemble")
+medecin_clean <- medecin %>% filter(
+  !(substr(territoire, 1, 1) %in% c("0", "3")), region != "00-Ensemble",
+  sexe == "0-Ensemble", departement != "000-Ensemble", exercice == "0-Ensemble",
+  tranche_age == "00-Ensemble", specialites != "00-Ensemble"
+)
 
 # Passage en format long, création de la colonne année et mise en forme des libellés pour les graphiques
-medecin_long <- medecin_clean %>% 
-  pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee))) %>%
-  mutate(specialites=str_to_title(str_extract(specialites, "(?<=-).*")), 
-         departement=str_to_title(str_extract(departement, "(?<=-).*")))
+medecin_long <- medecin_clean %>%
+  pivot_longer(cols = starts_with("effectif_"), names_to = "annee", values_to = "effectif") %>%
+  mutate(annee = as.integer(sub("effectif_", "", annee))) %>%
+  mutate(
+    specialites = str_to_title(str_extract(specialites, "(?<=-).*")),
+    departement = str_to_title(str_extract(departement, "(?<=-).*"))
+  )
 
 saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
 
 # Inf liberal
 
-inf_lib<-read_excel("data/Inf_lib_2012_2023.xlsx", sheet=2)
+inf_lib <- read_excel("data/Inf_lib_2012_2023.xlsx", sheet = 2)
 
 # Suppression des lignes agrégées et des colonnes inutiles
-inf_lib_clean <- inf_lib %>% 
-  filter(region!="00 - Ensemble", departement!="00 - Ensemble", sexe=="0 - Ensemble", tranche_age=="00 - Ensemble") %>% 
+inf_lib_clean <- inf_lib %>%
+  filter(region != "00 - Ensemble", departement != "00 - Ensemble", sexe == "0 - Ensemble", tranche_age == "00 - Ensemble") %>%
   select(-...17)
 
 # Passage en format long, création de la colonne année et nettoyage des libellés
-inf_lib_long <- inf_lib_clean %>% 
-  pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee))) %>% 
-  mutate(departement=str_replace_all(departement, " ", "")) %>% 
-  mutate(region=str_replace_all(region, " ", "")) %>%
+inf_lib_long <- inf_lib_clean %>%
+  pivot_longer(cols = starts_with("effectif_"), names_to = "annee", values_to = "effectif") %>%
+  mutate(annee = as.integer(sub("effectif_", "", annee))) %>%
+  mutate(departement = str_replace_all(departement, " ", "")) %>%
+  mutate(region = str_replace_all(region, " ", "")) %>%
   # Exclusion des années absentes des données infirmiers salariés (inf_sal) pour permettre la comparaison
-  filter(!annee %in% c(2012, 2022, 2023)) %>% 
-  mutate(data_type = "Infirmiers libéraux") %>% 
-  mutate(departement=str_to_title(str_extract(departement, "(?<=-).*")))
+  filter(!annee %in% c(2012, 2022, 2023)) %>%
+  mutate(data_type = "Infirmiers libéraux") %>%
+  mutate(departement = str_to_title(str_extract(departement, "(?<=-).*")))
 
 saveRDS(inf_lib_long, "donnees_traitees/inf_lib_long.rds")
 
 # Inf sal
 
-inf_sal<-read_excel("data/Inf_sal_2013_2021.xlsx", sheet=2)
+inf_sal <- read_excel("data/Inf_sal_2013_2021.xlsx", sheet = 2)
 
-inf_sal_clean_names <- inf_sal %>% 
-  rename(secteur_activite=`Secteur d'activité`, specialite=`Spécialité`, Tranche_age=`Tranche d'âge`, region=`Région`,
-         departement=`Département`)
+inf_sal_clean_names <- inf_sal %>%
+  rename(
+    secteur_activite = `Secteur d'activité`, specialite = `Spécialité`, Tranche_age = `Tranche d'âge`, region = `Région`,
+    departement = `Département`
+  )
 
 # Suppression des lignes agrégées pour ne conserver que les données détaillées
-inf_sal_clean <- inf_sal_clean_names %>% 
-  filter(region!="00-France entière (hors Mayotte)", departement!="00-Région entière", departement!="00-Région entière",
-         secteur_activite=="0-Ensemble", specialite=="0-Ensemble", Sexe=="0-Ensemble", Tranche_age=="00-Ensemble")
+inf_sal_clean <- inf_sal_clean_names %>%
+  filter(
+    region != "00-France entière (hors Mayotte)", departement != "00-Région entière", departement != "00-Région entière",
+    secteur_activite == "0-Ensemble", specialite == "0-Ensemble", Sexe == "0-Ensemble", Tranche_age == "00-Ensemble"
+  )
 
 # Passage en format long, création de la colonne année et mise en forme des libellés
-inf_sal_long <- inf_sal_clean %>% 
-  pivot_longer(cols=starts_with("effectif_"), names_to="annee", values_to="effectif") %>% 
-  mutate(annee=as.integer(sub("effectif_", "", annee))) %>% 
-  mutate(data_type="Infirmiers salariés") %>% 
-  mutate(departement=str_to_title(str_extract(departement, "(?<=-).*")))
+inf_sal_long <- inf_sal_clean %>%
+  pivot_longer(cols = starts_with("effectif_"), names_to = "annee", values_to = "effectif") %>%
+  mutate(annee = as.integer(sub("effectif_", "", annee))) %>%
+  mutate(data_type = "Infirmiers salariés") %>%
+  mutate(departement = str_to_title(str_extract(departement, "(?<=-).*")))
 
 saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
 
 # APL med
 
-APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet=2, skip=8)
-APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet=3, skip=8)
+APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet = 2, skip = 8)
+APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet = 3, skip = 8)
 
 # Nettoyage et mise en forme des données
-APL_med_2022_clean <- clean_APL_med(APL_med_2022, annee=2022, annee_pop=2020)
-APL_med_2023_clean <- clean_APL_med(APL_med_2023, annee=2023, annee_pop=2021)
+APL_med_2022_clean <- clean_APL_med(APL_med_2022, annee = 2022, annee_pop = 2020)
+APL_med_2023_clean <- clean_APL_med(APL_med_2023, annee = 2023, annee_pop = 2021)
 
 APL_med <- bind_rows(APL_med_2022_clean, APL_med_2023_clean)
 
 APL_med_long <- APL_med %>%
   select(Commune, Code_INSEE, Pop_standardisee_med, APL_tous, APL_65, APL_62, APL_60, annee) %>%
-  pivot_longer(cols=starts_with("APL"), names_to="age_medecins", values_to="APL") %>% 
-  mutate(Pop_standardisee_med=as.numeric(Pop_standardisee_med), 
-         APL=as.numeric(APL), age_medecins=factor(age_medecins))
+  pivot_longer(cols = starts_with("APL"), names_to = "age_medecins", values_to = "APL") %>%
+  mutate(
+    Pop_standardisee_med = as.numeric(Pop_standardisee_med),
+    APL = as.numeric(APL), age_medecins = factor(age_medecins)
+  )
 
 saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
 
-# APL inf 
+# APL inf
 
-APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet=2, skip=8)
-APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet=3, skip=8)
+APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet = 2, skip = 8)
+APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet = 3, skip = 8)
 
 # Nettoyage et mise en forme des données
-APL_inf_2022_clean <- clean_APL_inf(APL_inf_2022, annee=2022, annee_pop=2020)
-APL_inf_2023_clean <- clean_APL_inf(APL_inf_2023, annee=2023, annee_pop=2021)
+APL_inf_2022_clean <- clean_APL_inf(APL_inf_2022, annee = 2022, annee_pop = 2020)
+APL_inf_2023_clean <- clean_APL_inf(APL_inf_2023, annee = 2023, annee_pop = 2021)
 
 APL_inf <- bind_rows(APL_inf_2022_clean, APL_inf_2023_clean)
 
@@ -108,42 +118,52 @@ saveRDS(APL_inf, "donnees_traitees/APL_inf.rds")
 
 # Utilisation des fonctions sur les données
 morta_dip <- import_all_sheets("data/MORTA_DIP.xlsx")
-morta_dip <- morta_dip %>% filter(Diplme_INDICATEUR != "Âge") %>% rename(age = Diplme_INDICATEUR)
+morta_dip <- morta_dip %>%
+  filter(Diplme_INDICATEUR != "Âge") %>%
+  rename(age = Diplme_INDICATEUR)
 
 morta_cs <- import_all_sheets("data/MORTA_CS.xlsx")
-morta_cs <- morta_cs %>% filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>% rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
+morta_cs <- morta_cs %>%
+  filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>%
+  rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
 
 # Pivot des deux tables
 morta_dip <- morta_dip %>%
-  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>% 
-  pivot_longer(cols = -c(int_annee, sexe, age),
-               names_to = c("diplome", "indicateur"),
-               names_sep = "_",
-               values_to = "valeur_dip") %>% 
-  mutate(age = as.numeric(age)) %>% 
+  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>%
+  pivot_longer(
+    cols = -c(int_annee, sexe, age),
+    names_to = c("diplome", "indicateur"),
+    names_sep = "_",
+    values_to = "valeur_dip"
+  ) %>%
+  mutate(age = as.numeric(age)) %>%
   mutate(indicateur = recode(indicateur,
-                             "Quotientdemortalitpour100000"="Quotient de mortalité pour 10000" , 
-                             "Survielgex"="Survie à âge x",
-                             "Esprancedevielgex"="Esperance de vie à âge x"))
+    "Quotientdemortalitpour100000" = "Quotient de mortalité pour 10000",
+    "Survielgex" = "Survie à âge x",
+    "Esprancedevielgex" = "Esperance de vie à âge x"
+  ))
 
 
 morta_cs <- morta_cs %>%
-  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>% 
-  pivot_longer(cols = -c(int_annee, sexe, age),
-               names_to = c("classe_sociale", "indicateur"),
-               names_sep = "_",
-               values_to = "valeur_cs") %>%
-  mutate(age = as.numeric(age)) %>%   
+  mutate(across(contains("Esprancedevielgex"), as.numeric)) %>%
+  pivot_longer(
+    cols = -c(int_annee, sexe, age),
+    names_to = c("classe_sociale", "indicateur"),
+    names_sep = "_",
+    values_to = "valeur_cs"
+  ) %>%
+  mutate(age = as.numeric(age)) %>%
   mutate(indicateur = recode(indicateur,
-                             "Quotientdemortalitpour100000"="Quotient de mortalité pour 10000" , 
-                             "Survielgex"="Survie à âge x",
-                             "Esprancedevielgex"="Esperance de vie à âge x"))
+    "Quotientdemortalitpour100000" = "Quotient de mortalité pour 10000",
+    "Survielgex" = "Survie à âge x",
+    "Esprancedevielgex" = "Esperance de vie à âge x"
+  ))
 
 
 
 # Lecture des 2 premières lignes pour récupérer les variables et le sexe
 headers <- read_excel("data/FET2021-28.xlsx", n_max = 2, col_names = FALSE)
-header1 <- headers[1, ] %>% unlist()  # noms des variables
+header1 <- headers[1, ] %>% unlist() # noms des variables
 header1 <- fill(data.frame(header1), header1)$header1
 
 sexe_code <- headers[2, ] %>% unlist() # H ou F
@@ -153,7 +173,7 @@ dat <- read_excel("data/FET2021-28.xlsx", skip = 2, col_names = FALSE)
 
 # Création des noms uniques
 colnames_unique <- paste0(header1, "_", sexe_code)
-colnames_unique<- c("Région", colnames_unique)
+colnames_unique <- c("Région", colnames_unique)
 
 # On renomme nos entêtes
 colnames(dat) <- colnames_unique
@@ -183,8 +203,9 @@ mortalite_perinatale_comb <- dat %>%
     names_to = "variable_sexe",
     values_to = "valeur"
   ) %>%
-  mutate(sexe = "Tous",
-         variable = str_remove(variable_sexe, "_Ensemble")
+  mutate(
+    sexe = "Tous",
+    variable = str_remove(variable_sexe, "_Ensemble")
   )
 
 # Combine les deux
@@ -209,29 +230,32 @@ df_communes <- bind_rows(df_communes_2022, df_communes_2023)
 
 
 # Chargement données
-#quiet = TRUE : pas d'affichage
+# quiet = TRUE : pas d'affichage
 communes_geo <- st_read(
   "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune/exports/geojson",
-  quiet = TRUE)%>%
-  mutate(code_commune=as.character(com_code))
+  quiet = TRUE
+) %>%
+  mutate(code_commune = as.character(com_code))
 
 
 # Fusion de commune et nos données par code_commune
 communes_avec_geo <- communes_geo %>%
-  left_join(df_communes, by="code_commune")%>%
+  left_join(df_communes, by = "code_commune") %>%
   filter(!substr(code_commune, 1, 2) %in% c("97", "98"))
 
 
 # Regroupe les communes par région
-regions_apl<-communes_avec_geo %>%
+regions_apl <- communes_avec_geo %>%
   group_by(reg_code, reg_name, annee) %>%
   summarise(
-    #apl_moyen par région
-    apl_moyen=mean(apl_generalistes, na.rm=TRUE),
-    #Population totale par région
-    population_totale=sum(pop_totale, na.rm=TRUE), .groups="drop")
+    # apl_moyen par région
+    apl_moyen = mean(apl_generalistes, na.rm = TRUE),
+    # Population totale par région
+    population_totale = sum(pop_totale, na.rm = TRUE), .groups = "drop"
+  )
 
 
 # Sauvegarder les données (format .rds)
-saveRDS( list( communes = communes_avec_geo, regions = regions_apl),
-         file = "donnees_traitees/donnees_propres_apl_generalistes.rds")
+saveRDS(list(communes = communes_avec_geo, regions = regions_apl),
+  file = "donnees_traitees/donnees_propres_apl_generalistes.rds"
+)

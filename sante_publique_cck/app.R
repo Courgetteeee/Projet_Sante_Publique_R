@@ -73,16 +73,17 @@ ui <- navbarPage(
       tabPanel("Evolution des effectifs chez les medecins",
         sidebarLayout(
             sidebarPanel(
-              selectInput(inputId="departement", label="Choisir un ou plusieurs département :", choices=sort(unique(medecin_long$departement)), 
-                          selected=medecin_long$departement[1], multiple=TRUE),
-              selectInput(inputId="specialites", label="Choisir une spécialité :", choices=sort(unique(medecin_long$specialites)), 
-                          selected=medecin_long$specialites[1]),
+              selectInput(inputId = "departement", label = "Choisir un ou plusieurs département :", choices = sort(unique(medecin_long$departement)), 
+                          selected = medecin_long$departement[1], multiple = TRUE),
+              selectInput(inputId = "specialites", label = "Choisir une spécialité :", choices = sort(unique(medecin_long$specialites)), 
+                          selected = medecin_long$specialites[1]),
               downloadLink('downloadData_1', 'Télécharger')
             ),
     
             # Show a plot of the generated distribution
             mainPanel(
-              plotOutput("effectifs_medecin")%>% withSpinner(color="#667eea")
+              plotOutput("effectifs_medecin") %>%
+                withSpinner(color="#667eea")
             )
           )
         ),
@@ -90,15 +91,16 @@ ui <- navbarPage(
       tabPanel("Evolution des effectifs chez les infirmiers",
                sidebarLayout(
                  sidebarPanel(
-                   selectInput(inputId="departement2", label="Choisir un ou plusieurs département :", 
-                               choices=sort(unique(inf_lib_sal$departement)), 
-                               selected=inf_lib_sal$departement[1], multiple=TRUE),
+                   selectInput(inputId = "departement2", label = "Choisir un ou plusieurs département :", 
+                               choices = sort(unique(inf_lib_sal$departement)), 
+                               selected = inf_lib_sal$departement[1], multiple = TRUE),
                    downloadLink('downloadData_2', 'Télécharger')
                  ),
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("effectifs_infirmiers")%>% withSpinner(color="#667eea")
+                   plotOutput("effectifs_infirmiers") %>%
+                     withSpinner(color="#667eea")
                  )
                )
             ),
@@ -107,15 +109,15 @@ ui <- navbarPage(
                sidebarLayout(
                  sidebarPanel(
                    wellPanel(
-                     style="margin-bottom:5px;",
-                     icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
+                     style = "margin-bottom:5px;",
+                     icon("info-circle", style = "color:#2196F3; margin-right: 10px;"),
                      strong("Qu'est ce que l'APL ? "),
                      "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins/infirmiers et
                       la demande de soins sur un territoire. Plus l'APL est élevé, meilleure est l'accessibilité."
                    ),
-                   selectInput(inputId="Commune", label="Choisir une Commune :", 
-                               choices=sort(unique(APL_med_long$Commune)), 
-                               selected=APL_med_long$Commune[1]),
+                   selectInput(inputId = "Commune", label = "Choisir une Commune :", 
+                               choices = sort(unique(APL_med_long$Commune)), 
+                               selected = APL_med_long$Commune[1]),
                    downloadLink('downloadData_3', 'Télécharger graphe médecins'),
                    br(),
                    downloadLink('downloadData_4', 'Télécharger graphe infirmiers'),
@@ -131,20 +133,22 @@ ui <- navbarPage(
                   tags$div(
                     style="background-color:#2BC4A3; color:white; padding:15px; border-radius:8px; margin-bottom:10px; text-align:center;",
                     strong("APL moyen médecins : "), 
-                    span(textOutput("APL_moyen_med", inline=TRUE), style="font-size:18px; font-weight:bold;")
+                    span(textOutput("APL_moyen_med", inline = TRUE), style="font-size:18px; font-weight:bold;")
                   ),
                   
                   tags$div(
                     style="background-color:#2BC4A3; color:white; padding:15px; border-radius:8px; margin-bottom:10px; text-align:center;",
                     strong("APL moyen infirmiers : "), 
-                    span(textOutput("APL_moyen_inf", inline=TRUE), style="font-size:18px; font-weight:bold;")
+                    span(textOutput("APL_moyen_inf", inline = TRUE), style = "font-size:18px; font-weight:bold;")
                   )
                  ),
                  
                  # Show a plot of the generated distribution
                  mainPanel(
-                   plotOutput("offre_besoin_med")%>% withSpinner(color="#667eea"),
-                   plotOutput("offre_besoin_inf")%>% withSpinner(color="#667eea")
+                   plotOutput("offre_besoin_med") %>%
+                     withSpinner(color="#667eea"),
+                   plotOutput("offre_besoin_inf") %>%
+                     withSpinner(color="#667eea")
                  )
                )
             )
@@ -163,29 +167,31 @@ ui <- navbarPage(
      tabPanel("Mortalité Périnatale",
         fluidPage(
           downloadLink('downloadData_5', 'Télécharger'),
-          plotOutput("mortalite_peri_reg")%>% withSpinner(color="#667eea")
+          plotOutput("mortalite_peri_reg") %>%
+            withSpinner(color = "#667eea")
         )
      ),
              
      tabPanel("Mortalité et causes par région",
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId="Cause", label="Choisir la cause du décès :", 
-                              choices=sort(unique(mortalite_cause$variable))),
+                  selectInput(inputId = "Cause", label = "Choisir la cause du décès :", 
+                              choices = sort(unique(mortalite_cause$variable))),
                   downloadLink('downloadData_6', 'Télécharger')
                 ),
                 mainPanel(
-                  plotOutput("mortalite_cause_bar")%>% withSpinner(color="#667eea")
+                  plotOutput("mortalite_cause_bar") %>%
+                    withSpinner(color = "#667eea")
                 )
               )
      ),
      tabPanel("Indicateur de mortalité selon le diplôme ",
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId="Indicateur", label="Choisir l'indicateur a représenter :", 
-                              choices=sort(unique(morta_dip$indicateur))),
-                  selectInput(inputId="Annees", label="Années :", 
-                              choices=sort(unique(morta_dip$int_annee))),
+                  selectInput(inputId = "Indicateur", label = "Choisir l'indicateur a représenter :", 
+                              choices = sort(unique(morta_dip$indicateur))),
+                  selectInput(inputId = "Annees", label = "Années :", 
+                              choices = sort(unique(morta_dip$int_annee))),
                   downloadLink('downloadData_7', 'Télécharger'),
                   div("Indicateurs mortalité :",
                       tags$ul(
@@ -197,17 +203,18 @@ ui <- navbarPage(
                   )
                 ),
                 mainPanel(
-                  plotOutput("mortalite_diplome")%>% withSpinner(color="#667eea")
+                  plotOutput("mortalite_diplome") %>%
+                    withSpinner(color="#667eea")
                 )
               )
      ),      
      tabPanel("Indicateur de mortalité selon la classe sociale ",
               sidebarLayout(
                 sidebarPanel(
-                  selectInput(inputId="Indicateur_cs", label="Choisir l'indicateur a représenter :", 
-                              choices=sort(unique(morta_cs$indicateur))),
-                  selectInput(inputId="Annees_cs", label="Années :", 
-                              choices=sort(unique(morta_cs$int_annee))),
+                  selectInput(inputId = "Indicateur_cs", label = "Choisir l'indicateur a représenter :", 
+                              choices = sort(unique(morta_cs$indicateur))),
+                  selectInput(inputId = "Annees_cs", label="Années :", 
+                              choices = sort(unique(morta_cs$int_annee))),
                   downloadLink('downloadData_8', 'Télécharger'),
                   div("Indicateurs mortalité :",
                       tags$ul(
@@ -219,7 +226,8 @@ ui <- navbarPage(
                   )
                 ),
                 mainPanel(
-                  plotOutput("mortalite_classe")%>% withSpinner(color="#667eea")
+                  plotOutput("mortalite_classe") %>%
+                    withSpinner(color="#667eea")
                 )
               )
      )
@@ -253,7 +261,7 @@ ui <- navbarPage(
       column(12,
              div(
                style="background: #e3f2fd; margin: 20px 0;border-radius: 5px;",
-               icon("info-circle", style="color:#2196F3; margin-right: 10px;"),
+               icon("info-circle", style = "color:#2196F3; margin-right: 10px;"),
                strong("Qu'est ce que l'APL ? "),
                "L'Accessibilité Potentielle Localisée mesure l'adéquation entre l'offre de médecins et
                       la demande de soins sur un territoire. Plus l'APL est elevé, meilleure est l'accessibilité."
@@ -265,35 +273,29 @@ ui <- navbarPage(
     tabsetPanel(  
       #Onglet 1 : Par région
       tabPanel(
-        #Titre
         "Carte régionale",
-        #Saut de ligne
         br(),
-        
-        
-        #Divise la page en deux colonnes
         fluidRow(
-          
-          #Colonne de gauche
           column(width=5,
-                 #Menu déroulant
                  selectInput(
                    inputId = "region_choisie",
                    label = "Choisissez une région",
                    choices = { communes_avec_geo_apl_gener %>%
                        st_drop_geometry() %>%
-                       pull(reg_name) %>% as.character() %>%
-                       unique() %>% na.omit() %>% sort()
+                       pull(reg_name) %>%
+                       as.character() %>%
+                       unique() %>%
+                       na.omit() %>%
+                       sort()
                    },
                    selected = "Bourgogne-Franche-Comté"
                  ),
                  
                  #Bouton dowload
                  downloadButton("download_carte_region", "Télécharger la carte",
-                                style="background-color: #667eea; border:none;margin-bottom: 20px;"),
+                                style = "background-color: #667eea; border:none;margin-bottom: 20px;"),
                  
                  br(),
-                 
                  
                  #Indicateur 1 : Classement de la région
                  div(
@@ -305,7 +307,7 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("Classement national", style="margin-bottom: 0; font-size: 1.7em;"),
+                   h5("Classement national", style = "margin-bottom: 0; font-size: 1.7em;"),
                    uiOutput("classement_region"),
                    p("Sur l'accessibilité aux médecins généralistes", style = "margin-bottom: 0;")
                  ),
@@ -320,7 +322,7 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("APL moyen de la région", style="margin-bottom: 0; font-size: 1.7em;"),
+                   h5("APL moyen de la région", style = "margin-bottom: 0; font-size: 1.7em;"),
                    uiOutput("apl_region_selectionnee"),
                    p("Médecin généraliste", style = "margin-bottom: 0;")
                  ),
@@ -335,7 +337,7 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("Population totale de la région", style="margin-bottom: 0; font-size: 1.7em;"),
+                   h5("Population totale de la région", style = "margin-bottom: 0; font-size: 1.7em;"),
                    uiOutput("population_region"),
                    p("Habitants (recensement)", style = "margin-bottom: 0;")
                  )
@@ -343,9 +345,10 @@ ui <- navbarPage(
           ),
           
           #Colonne de droite : carte
-          column(width=7,
-                 h4("Carte par région", style="font-size: 2.2em;text-align: center;"),
-                 leafletOutput("carte_region_gener", height = "600px")%>% withSpinner(color="#667eea")
+          column(width = 7,
+                 h4("Carte par région", style = "font-size: 2.2em;text-align: center;"),
+                 leafletOutput("carte_region_gener", height = "600px") %>%
+                   withSpinner(color="#667eea")
           )
         )
       ),
@@ -359,18 +362,18 @@ ui <- navbarPage(
         
         fluidRow(
           #Carte à gauche
-          column(width=8,
-                 h4("Carte de la France", style= "font-size: 2.4em;text-align: center;"),
-                 leafletOutput("carte_france_gener", height = "600px") %>% withSpinner(color="#667eea")
+          column(width = 8,
+                 h4("Carte de la France", style = "font-size: 2.4em;text-align: center;"),
+                 leafletOutput("carte_france_gener", height = "600px") %>%
+                   withSpinner(color="#667eea")
           ),
           
           
           #Indicateurs à droite
-          column(width=3,
-                 h4("Indicateurs", style="font-size: 2.4em;text-align: center; margin-bottom: 20px;"),
-                 #Bouton dowload
+          column(width = 3,
+                 h4("Indicateurs", style = "font-size: 2.4em;text-align: center; margin-bottom: 20px;"),
                  downloadButton("download_carte_france", "Télécharger la carte",
-                                style="background-color: #667eea; border:none;margin-bottom: 20px;width: 100%;text-align: center;"),
+                                style = "background-color: #667eea; border:none;margin-bottom: 20px;width: 100%;text-align: center;"),
                  
                  #Indicateur 1 : APL moyen france
                  div(
@@ -382,7 +385,7 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("APL moyen en France", style="margin-top: 0; font-size: 1.7em;"), 
+                   h5("APL moyen en France", style = "margin-top: 0; font-size: 1.7em;"), 
                    uiOutput("apl_moyen_france"),
                    p("Médecins généralistes", style = "margin-bottom: 0;"),
                  ),
@@ -397,7 +400,7 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("Meilleure accessibilité", style="margin-bottom: 0; font-size: 1.7em;"),
+                   h5("Meilleure accessibilité", style = "margin-bottom: 0; font-size: 1.7em;"),
                    uiOutput("region_max"),
                    uiOutput("apl_max_valeur"), 
                  ),
@@ -412,25 +415,19 @@ ui <- navbarPage(
                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
                                   min-height: 150px;
                                   text-align: center;",
-                   h5("Pire accessibilité", style="margin-bottom: 0; font-size: 1.7em;"),
+                   h5("Pire accessibilité", style = "margin-bottom: 0; font-size: 1.7em;"),
                    uiOutput("region_min"),
                    uiOutput("apl_min_valeur"), 
                    
                  ),
-                 
-                 #br(),
-                 
           ),
-          
-          
-          
         ),
       ),
     )
   ),
   
   #Pied de page
-  tags$footer( style="background-color: #ebe8e8;text-align: center;",
+  tags$footer( style = "background-color: #ebe8e8;text-align: center;",
                p("2025/2026 - Projet Santé Publique - Clara GAMBARDELLO, Karla PEM, Cindy LANCON"),
                p("Master Modélisation Statistique | R avancé")),
   
@@ -446,8 +443,8 @@ server <- function(input, output) {
     title = div(icon("hand-paper"), "Bienvenue !"),
     "Bienvenue sur notre tableau de bord de santé publique. Explorez les données sur 
     l'offre de soins, la mortalité et l'accessiblité aux médecins en France.",
-    footer=modalButton("Explorer !"),
-    easyClose=TRUE
+    footer = modalButton("Explorer !"),
+    easyClose = TRUE
   ))  
 
   
@@ -456,16 +453,16 @@ server <- function(input, output) {
       
       p <- medecin_long %>%
         filter(departement %in% input$departement, specialites==input$specialites) %>%
-        ggplot(aes(x=annee, y=effectif, color=departement)) +
-        geom_line(linewidth=1.5) +
-        geom_point(size=3) +
+        ggplot(aes(x = annee, y = effectif, color = departement)) +
+        geom_line(linewidth = 1.5) +
+        geom_point(size = 3) +
         xlab("Année") +
         ylab("Effectif") +
         ggtitle(paste0("Évolution des effectifs des médecins de spécialité : ",
                        input$specialites)) +
         theme_bw() +
-        labs(color="Département") +
-        scale_color_viridis_d(option="magma", begin=0.3, end=0.85)
+        labs(color = "Département") +
+        scale_color_viridis_d(option = "magma", begin = 0.3, end = 0.85)
       
       plot_medecin(p)
       print(p)
@@ -474,16 +471,17 @@ server <- function(input, output) {
     
     # Graphe effectifs infirmiers
     output$effectifs_infirmiers <- renderPlot({
-      p <- inf_lib_sal %>% filter(departement %in% input$departement2) %>%
-      ggplot(aes(x=annee, y=effectif, col=departement)) +
+      p <- inf_lib_sal %>%
+        filter(departement %in% input$departement2) %>%
+        ggplot(aes(x = annee, y = effectif, col = departement)) +
         geom_line() +
-        facet_wrap(~data_type, scales="free_y") +
-        scale_x_continuous(breaks=unique(inf_lib_sal$annee)) +
+        facet_wrap(~data_type, scales = "free_y") +
+        scale_x_continuous(breaks = unique(inf_lib_sal$annee)) +
         theme_bw() +
-        labs(title="Effectifs par année des infirmiers",
-             x="Année", y="Effectif") +
-        scale_color_discrete(name="Département") +
-        scale_color_viridis_d(option="magma", begin=0.3, end=0.85)
+        labs(title = "Effectifs par année des infirmiers",
+             x = "Année", y = "Effectif") +
+        scale_color_discrete(name = "Département") +
+        scale_color_viridis_d(option = "magma", begin = 0.3, end = 0.85)
       
       plot_infirmiers(p)
       print(p)
@@ -493,9 +491,9 @@ server <- function(input, output) {
     output$offre_besoin_med <- renderPlot({
       p<-APL_med_long %>%
         filter(Commune==input$Commune) %>%
-        ggplot(aes(x=age_medecins, y=APL, fill=age_medecins)) +
+        ggplot(aes(x = age_medecins, y = APL, fill = age_medecins)) +
           geom_col() +
-          geom_text(aes(label=round(APL, 2)), vjust=-0.5, size=4) +
+          geom_text(aes(label = round(APL, 2)), vjust = -0.5, size = 4) +
           facet_wrap(~annee) +
           labs(x="Tranche d'âge des médecins", y="Accessibilité potentielle localisée",
           title=paste("APL médecins : ", input$Commune)) +
@@ -519,13 +517,13 @@ server <- function(input, output) {
     output$offre_besoin_inf <- renderPlot({
       p<-APL_inf %>% 
         filter(Commune==input$Commune) %>% 
-        ggplot(aes(x=factor(annee), y=APL_infirmiere, fill=factor(annee))) +
-        geom_bar(stat="identity", width=0.6) +
-        geom_text(aes(label=round(APL_infirmiere, 2)), vjust=-0.8, size=4) +
-        labs(y="Accessibilité potentielle localisée", x="Année",
-          title=paste("APL infirmiers : ", input$Commune)) +
-        scale_fill_manual(name="Année",
-          values=c("2022"="#A2C8F2", 
+        ggplot(aes(x = factor(annee), y = APL_infirmiere, fill = factor(annee))) +
+        geom_bar(stat = "identity", width = 0.6) +
+        geom_text(aes(label = round(APL_infirmiere, 2)), vjust = -0.8, size = 4) +
+        labs(y = "Accessibilité potentielle localisée", x = "Année",
+          title = paste("APL infirmiers : ", input$Commune)) +
+        scale_fill_manual(name = "Année",
+          values = c("2022"="#A2C8F2", 
                    "2023"="#F7C6A3")) +
         theme_bw()
       plot_apl_inf(p)
@@ -535,7 +533,7 @@ server <- function(input, output) {
     # APL moyen médecins
     output$APL_moyen_med <- renderText({
       mean_val <- APL_med_long %>%
-        summarise(moy=mean(APL, na.rm=TRUE)) %>%
+        summarise(moy = mean(APL, na.rm = TRUE)) %>%
         pull(moy)
       
       paste0(round(mean_val, 2))
@@ -544,7 +542,7 @@ server <- function(input, output) {
     # APL moyen infirmiers
     output$APL_moyen_inf <- renderText({
       mean_val <- APL_inf %>%
-        summarise(moy=mean(APL_infirmiere, na.rm=TRUE)) %>%
+        summarise(moy = mean(APL_infirmiere, na.rm = TRUE)) %>%
         pull(moy)
       
       paste0(round(mean_val, 2))
@@ -554,27 +552,27 @@ server <- function(input, output) {
     
     # Téléchargement Graphique effectif medecin
     plot_medecin <- reactiveVal(NULL)
-    download_plot(output=output, output_id="downloadData_1",
-                  plot_name=plot_medecin, name_pdf="Effectif_medecin")
+    download_plot(output = output, output_id = "downloadData_1",
+                  plot_name = plot_medecin, name_pdf = "Effectif_medecin")
     
     # Téléchargement Graphique effectif infirmier
     plot_infirmiers <- reactiveVal(NULL)
-    download_plot(output=output, output_id="downloadData_2",
-                  plot_name=plot_infirmiers, name_pdf="Effectif_infirmiers")
+    download_plot(output = output, output_id = "downloadData_2",
+                  plot_name = plot_infirmiers, name_pdf = "Effectif_infirmiers")
     
     # Téléchargement Graphique APL médecins
     plot_apl_med  <- reactiveVal(NULL)
-    download_plot(output=output, input=input, output_id="downloadData_3",
-                  plot_name=plot_apl_med, 
-                  name_pdf=function(input){
+    download_plot(output = output, input = input, output_id = "downloadData_3",
+                  plot_name = plot_apl_med, 
+                  name_pdf = function(input){
                     paste0("APL_medecins_", input$Commune)
                     })
     
     # Téléchargement Graphique APL infirmiers
     plot_apl_inf  <- reactiveVal(NULL)
-    download_plot(output=output, input=input, output_id="downloadData_4",
-                  plot_name=plot_apl_inf, 
-                  name_pdf=function(input){
+    download_plot(output = output, input = input, output_id = "downloadData_4",
+                  plot_name = plot_apl_inf, 
+                  name_pdf = function(input){
                     paste0("APL_infirmiers_", input$Commune)
                   })
     
@@ -583,7 +581,9 @@ server <- function(input, output) {
     
     #Graphe mortalité périnatale
     output$mortalite_peri_reg<- renderPlot({
-      mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur, decreasing = TRUE)])
+      mortalite_perinatale$Région <- factor(mortalite_perinatale$Région,
+                                            levels = mortalite_perinatale$Région[order(mortalite_perinatale$valeur,
+                                                                                       decreasing = TRUE)])
       
       p<-ggplot(mortalite_perinatale) +
         aes(x = Région, y = valeur) +
@@ -696,30 +696,30 @@ server <- function(input, output) {
     
     # Téléchargement mortalité périnatale
     plot_morta_peri <- reactiveVal(NULL)
-    download_plot(output=output, output_id="downloadData_5",
-                  plot_name=plot_morta_peri, name_pdf="Mortalite_perinatale")
+    download_plot(output = output, output_id = "downloadData_5",
+                  plot_name = plot_morta_peri, name_pdf = "Mortalite_perinatale")
     
     # Téléchargement mortalité cause
     plot_morta_cause <- reactiveVal(NULL)
-    download_plot(output=output, input=input, output_id="downloadData_6",
-                  plot_name=plot_morta_cause, 
-                  name_pdf=function(input){
+    download_plot(output = output, input = input, output_id = "downloadData_6",
+                  plot_name = plot_morta_cause, 
+                  name_pdf = function(input){
                     paste0("Mortalite_cause_", input$Cause)
                   })
     
     # Téléchargement mortalité diplome
     plot_morta_dip <- reactiveVal(NULL)
-    download_plot(output=output, input=input, output_id="downloadData_7",
-                  plot_name=plot_morta_dip, 
-                  name_pdf=function(input){
+    download_plot(output = output, input = input, output_id = "downloadData_7",
+                  plot_name = plot_morta_dip, 
+                  name_pdf = function(input){
                     paste0("Mortalite_diplome_", input$Annees)
                   })
     
     # Téléchargement mortalité classe sociale
     plot_morta_cs <- reactiveVal(NULL)
-    download_plot(output=output, input=input, output_id="downloadData_8",
-                  plot_name=plot_morta_cs, 
-                  name_pdf=function(input){
+    download_plot(output = output, input = input, output_id = "downloadData_8",
+                  plot_name = plot_morta_cs, 
+                  name_pdf = function(input){
                     paste0("Mortalite_classe_sociale_", input$Annees_cs)
                   })
     
@@ -728,10 +728,12 @@ server <- function(input, output) {
     
     #### Données filtrer par année
     regions_filtre_apl_gener <- reactive({
-      regions_apl_gener  %>% filter(annee==input$annee_choisie)
+      regions_apl_gener  %>%
+        filter(annee==input$annee_choisie)
     })
     communes_filtre_apl_gener2 <- reactive({
-      communes_avec_geo_apl_gener  %>% filter(annee==input$annee_choisie)
+      communes_avec_geo_apl_gener %>%
+        filter(annee==input$annee_choisie)
     })
     
     
@@ -741,7 +743,7 @@ server <- function(input, output) {
       #Filtrer les données
       region_data <- regions_filtre_apl_gener()
       #Palette de couleurs
-      pal <- colorNumeric(palette = "magma", domain= region_data$apl_moyen, reverse=FALSE)
+      pal <- colorNumeric(palette = "magma", domain = region_data$apl_moyen, reverse=FALSE)
       #Calcul la bounding box (pour centrer la carte)
       b <- st_bbox(region_data)
       
@@ -751,10 +753,10 @@ server <- function(input, output) {
         setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
                 zoom = 6) %>%
         #Ajout des polygones des régions avec couleurs
-        addPolygons( fillColor = ~pal(apl_moyen), weight=1,color = "white",
-                     fillOpacity = 0.8,
-                     label = ~paste0(reg_name, " : APL ", round(apl_moyen, 2)) %>% lapply(htmltools::HTML)) %>%
-        addLegend("bottomright",pal=pal, values=~apl_moyen, title="APL moyen")
+        addPolygons( fillColor = ~pal(apl_moyen), weight = 1 ,color = "white", fillOpacity = 0.8,
+                     label = ~paste0(reg_name, " : APL ", round(apl_moyen, 2)) %>%
+                       lapply(htmltools::HTML)) %>%
+        addLegend("bottomright", pal = pal, values =~apl_moyen, title = "APL moyen")
     })
     
     
@@ -762,7 +764,7 @@ server <- function(input, output) {
     #Plot réactif (calculé une seule fois)
     plot_france <- reactive({
       ggplot(regions_filtre_apl_gener())+
-        geom_sf(aes(fill=apl_moyen), color ="black", size=0.1)+
+        geom_sf(aes(fill = apl_moyen), color = "black", size=0.1)+
         scale_fill_viridis_c( option = "magma",
                               name = "APL moyen")+
         theme_bw()+
@@ -774,37 +776,47 @@ server <- function(input, output) {
     
     #INDICATEUR 2.1 APL moyen France
     output$apl_moyen_france <- renderUI({
-      apl_moyen <- regions_filtre_apl_gener() %>% st_drop_geometry() %>%
-        summarise(apl = mean(apl_moyen, na.rm=TRUE)) %>% pull(apl)
-      tags$div(round(apl_moyen, 1), style="font-size: 2.2em;")
+      apl_moyen <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        summarise(apl = mean(apl_moyen, na.rm = TRUE)) %>%
+        pull(apl)
+      tags$div(round(apl_moyen, 1), style = "font-size: 2.2em;")
     })
     
     #INDICATEUR 2.2 Région avec APL max
     ##la région
     output$region_max <- renderUI({
-      region <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_max(apl_moyen, n=1) %>%
+      region <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        slice_max(apl_moyen, n = 1) %>%
         pull(reg_name)
-      tags$div(region, style="font-size: 1.8em;font-weight: bold;")
+      tags$div(region, style = "font-size: 1.8em;font-weight: bold;")
     })
     ##l'apl max
     output$apl_max_valeur <- renderUI({
-      apl_max <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_max(apl_moyen, n=1) %>%
+      apl_max <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        slice_max(apl_moyen, n = 1) %>%
         pull(apl_moyen)
-      tags$div("APL : ", round(apl_max,1), style="font-size: 2em;")
+      tags$div("APL : ", round(apl_max,1), style = "font-size: 2em;")
     })
     
     #INDICATEUR 2.3 Région avec APL min
     ##la région
     output$region_min <- renderUI({
-      region <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_min(apl_moyen, n=1) %>%
+      region <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        slice_min(apl_moyen, n = 1) %>%
         pull(reg_name)
-      tags$div(region, style="font-size: 1.8em;font-weight: bold;")
+      tags$div(region, style = "font-size: 1.8em;font-weight: bold;")
     })
     ##l'apl min
     output$apl_min_valeur <- renderUI({
-      apl_min <- regions_filtre_apl_gener() %>% st_drop_geometry() %>% slice_min(apl_moyen, n=1) %>%
+      apl_min <- regions_filtre_apl_gener() %>%
+        st_drop_geometry() %>%
+        slice_min(apl_moyen, n = 1) %>%
         pull(apl_moyen)
-      tags$div("APL : ", round(apl_min,1), style="font-size: 2em;")
+      tags$div("APL : ", round(apl_min,1), style = "font-size: 2em;")
     })
     
     
@@ -827,10 +839,10 @@ server <- function(input, output) {
         setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
                 zoom = 8) %>%
         #Ajouter un fond grisé avec toutes les régions
-        addPolygons( data = toutes_regions, fillColor = "#f0f0f1", weight=1, color="#999",
+        addPolygons( data = toutes_regions, fillColor = "#f0f0f1", weight = 1, color="#999",
                      fillOpacity = 0.3) %>%
         #Ajout des polygones des régions avec couleurs
-        addPolygons( data = region_filtree, fillColor = ~pal(apl_generalistes), weight=0.5,color = "white",
+        addPolygons( data = region_filtree, fillColor = ~pal(apl_generalistes), weight = 0.5,color = "white",
                      fillOpacity = 0.9,
                      label = ~paste0(com_name, " : APL ", round(apl_generalistes, 2)) %>% lapply(htmltools::HTML)) %>%
         addLegend("bottomright",pal=pal, values=region_filtree$apl_generalistes, title="APL")
@@ -854,8 +866,10 @@ server <- function(input, output) {
     
     #INDICATEUR 1.1 Classement de la région select
     output$classement_region <- renderUI({
-      toutes_regions <- regions_filtre_apl_gener() %>% st_drop_geometry()%>%
-        arrange(desc(apl_moyen)) %>% mutate(rang=row_number())
+      toutes_regions <- regions_filtre_apl_gener() %>%
+        st_drop_geometry()%>%
+        arrange(desc(apl_moyen)) %>%
+        mutate(rang=row_number())
       
       #Trouver le rang
       region_info <- toutes_regions %>% filter(reg_name==input$region_choisie)
@@ -867,8 +881,8 @@ server <- function(input, output) {
       total <- nrow(toutes_regions)
       
       tags$div(
-        tags$span(paste0(rang,"e "), style="font-size: 2em;"),
-        tags$span(paste0("sur ",total," régions"), style="font-size: 2em;"))
+        tags$span(paste0(rang,"e "), style = "font-size: 2em;"),
+        tags$span(paste0("sur ",total," régions"), style = "font-size: 2em;"))
     })
     
     #INDICATEUR 1.2 APL moyen de la région sélectionnée
@@ -882,7 +896,7 @@ server <- function(input, output) {
       }
       apl <- as.numeric(region_info$apl_moyen)
       
-      tags$div(round(apl,1), style="font-size: 2em;")
+      tags$div(round(apl,1), style = "font-size: 2em;")
     })
     
     #INDICATEUR 1.3 Population de la region
@@ -897,17 +911,17 @@ server <- function(input, output) {
       
       pop <- region_info$population_totale
       
-      tags$div(format(pop, big.mark = " ", scientific = FALSE), style="font-size: 2em;")
+      tags$div(format(pop, big.mark = " ", scientific = FALSE), style = "font-size: 2em;")
     })
     
     # Téléchargement des cartes
     ##Carte france
-    download_map(output=output, input=input, output_id="download_carte_france",
-      plot_reactive=plot_france, prefix="carte_france_apl")
+    download_map(output = output, input = input, output_id = "download_carte_france",
+      plot_reactive = plot_france, prefix = "carte_france_apl")
     
     ##Carte régions
-    download_map(output=output, input=input, output_id="download_carte_region",
-      plot_reactive=plot_region, prefix="carte_region_apl")
+    download_map(output = output, input = input, output_id = "download_carte_region",
+      plot_reactive = plot_region, prefix = "carte_region_apl")
 }
 
 # ---------------------------- GLOBAL -----------------------------------
