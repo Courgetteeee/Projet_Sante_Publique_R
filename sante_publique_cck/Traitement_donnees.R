@@ -7,12 +7,41 @@ library(tidyr)
 
 source("fonctions.R")
 
+#Repertoires
+dir_input <- "../data"
+dir_output <- "../donnees_traitees"
+
+#Fichiers entrées
+fileinput_medecin <- file.path(dir_input, "Med_2012_2025.xlsx")
+fileinput_inf_lib <- file.path(dir_input, "Inf_lib_2012_2023.xlsx")
+fileinput_inf_sal <- file.path(dir_input, "Inf_sal_2013_2021.xlsx")
+fileinput_apl_med <- file.path(dir_input, "APL_med_gen.xlsx")
+fileinput_apl_inf <- file.path(dir_input, "APL_inf.xlsx")
+fileinput_morta_dip <- file.path(dir_input, "MORTA_DIP.xlsx")
+fileinput_morta_cs <- file.path(dir_input, "MORTA_CS.xlsx")
+fileinput_morta_cause <- file.path(dir_input, "FET2021-28.xlsx")
+fileinput_apl_gener <- file.path(dir_input, "APL_med_gen.xlsx")
+
+#Fichiers sorties
+fileoutput_medecin <- file.path(dir_output, "medecin_long.rds")
+fileoutput_inf_lib <- file.path(dir_output, "inf_lib_long.rds")
+fileoutput_inf_sal <- file.path(dir_output, "inf_sal_long.rds")
+fileoutput_apl_med <- file.path(dir_output, "APL_med_long.rds")
+fileoutput_apl_inf <- file.path(dir_output, "APL_inf.rds")
+fileoutput_morta_dip <- file.path(dir_output, "morta_dip.rds")
+fileoutput_morta_cs <- file.path(dir_output, "morta_cs.rds")
+fileoutput_morta_cause <- file.path(dir_output, "mortalite_cause.rds")
+fileoutput_morta_combine <- file.path(dir_output, "mortalite_combine.rds")
+fileoutput_morta_peri <- file.path(dir_output, "mortalite_perinatale.rds")
+fileoutput_apl_gener <- file.path(dir_output, "donnees_propres_apl_generalistes.rds")
+
+
 
 ## Import et prétraitement des données de Clara --------------------------------
 
 # Medecin
 
-medecin <- read_excel("data/Med_2012_2025.xlsx", sheet = 2)
+medecin <- read_excel(fileinput_medecin, sheet = 2)
 
 # Suppression des lignes correspondant à des agrégats "Ensemble" afin de ne conserver que les catégories détaillées
 medecin_clean <- medecin %>% filter(
@@ -30,11 +59,11 @@ medecin_long <- medecin_clean %>%
     departement = str_to_title(str_extract(departement, "(?<=-).*"))
   )
 
-saveRDS(medecin_long, "donnees_traitees/medecin_long.rds")
+saveRDS(medecin_long, fileoutput_medecin)
 
 # Inf liberal
 
-inf_lib <- read_excel("data/Inf_lib_2012_2023.xlsx", sheet = 2)
+inf_lib <- read_excel(fileinput_inf_lib, sheet = 2)
 
 # Suppression des lignes agrégées et des colonnes inutiles
 inf_lib_clean <- inf_lib %>%
@@ -52,11 +81,11 @@ inf_lib_long <- inf_lib_clean %>%
   mutate(data_type = "Infirmiers libéraux") %>%
   mutate(departement = str_to_title(str_extract(departement, "(?<=-).*")))
 
-saveRDS(inf_lib_long, "donnees_traitees/inf_lib_long.rds")
+saveRDS(inf_lib_long, fileoutput_inf_lib)
 
 # Inf sal
 
-inf_sal <- read_excel("data/Inf_sal_2013_2021.xlsx", sheet = 2)
+inf_sal <- read_excel(fileinput_inf_sal, sheet = 2)
 
 inf_sal_clean_names <- inf_sal %>%
   rename(
@@ -78,12 +107,12 @@ inf_sal_long <- inf_sal_clean %>%
   mutate(data_type = "Infirmiers salariés") %>%
   mutate(departement = str_to_title(str_extract(departement, "(?<=-).*")))
 
-saveRDS(inf_sal_long, "donnees_traitees/inf_sal_long.rds")
+saveRDS(inf_sal_long, fileoutput_inf_sal)
 
 # APL med
 
-APL_med_2022 <- read_excel("data/APL_med_gen.xlsx", sheet = 2, skip = 8)
-APL_med_2023 <- read_excel("data/APL_med_gen.xlsx", sheet = 3, skip = 8)
+APL_med_2022 <- read_excel(fileinput_apl_med, sheet = 2, skip = 8)
+APL_med_2023 <- read_excel(fileinput_apl_med, sheet = 3, skip = 8)
 
 # Nettoyage et mise en forme des données
 APL_med_2022_clean <- clean_APL_med(APL_med_2022, annee = 2022, annee_pop = 2020)
@@ -99,12 +128,12 @@ APL_med_long <- APL_med %>%
     APL = as.numeric(APL), age_medecins = factor(age_medecins)
   )
 
-saveRDS(APL_med_long, "donnees_traitees/APL_med_long.rds")
+saveRDS(APL_med_long, fileoutput_apl_med)
 
 # APL inf
 
-APL_inf_2022 <- read_excel("data/APL_inf.xlsx", sheet = 2, skip = 8)
-APL_inf_2023 <- read_excel("data/APL_inf.xlsx", sheet = 3, skip = 8)
+APL_inf_2022 <- read_excel(fileinput_apl_inf, sheet = 2, skip = 8)
+APL_inf_2023 <- read_excel(fileinput_apl_inf, sheet = 3, skip = 8)
 
 # Nettoyage et mise en forme des données
 APL_inf_2022_clean <- clean_APL_inf(APL_inf_2022, annee = 2022, annee_pop = 2020)
@@ -112,17 +141,17 @@ APL_inf_2023_clean <- clean_APL_inf(APL_inf_2023, annee = 2023, annee_pop = 2021
 
 APL_inf <- bind_rows(APL_inf_2022_clean, APL_inf_2023_clean)
 
-saveRDS(APL_inf, "donnees_traitees/APL_inf.rds")
+saveRDS(APL_inf, fileoutput_apl_inf)
 
 ## Import et prétraitement des données de Karla --------------------------------
 
 # Utilisation des fonctions sur les données
-morta_dip <- import_all_sheets("data/MORTA_DIP.xlsx")
+morta_dip <- import_all_sheets(fileinput_morta_dip)
 morta_dip <- morta_dip %>%
   filter(Diplme_INDICATEUR != "Âge") %>%
   rename(age = Diplme_INDICATEUR)
 
-morta_cs <- import_all_sheets("data/MORTA_CS.xlsx")
+morta_cs <- import_all_sheets(fileinput_morta_cs)
 morta_cs <- morta_cs %>%
   filter(Catgoriesocioprofessionnelle_INDICATEUR != "Âge") %>%
   rename(age = Catgoriesocioprofessionnelle_INDICATEUR)
@@ -162,13 +191,13 @@ morta_cs <- morta_cs %>%
 
 
 # Lecture des 2 premières lignes pour récupérer les variables et le sexe
-headers <- read_excel("data/FET2021-28.xlsx", n_max = 2, col_names = FALSE)
+headers <- read_excel(fileinput_morta_cause, n_max = 2, col_names = FALSE)
 header1 <- headers[1, ] %>% unlist() # noms des variables
 header1 <- fill(data.frame(header1), header1)$header1
 
 sexe_code <- headers[2, ] %>% unlist() # H ou F
 
-dat <- read_excel("data/FET2021-28.xlsx", skip = 2, col_names = FALSE)
+dat <- read_excel(fileinput_morta_cause, skip = 2, col_names = FALSE)
 
 # Création des noms uniques
 colnames_unique <- paste0(header1, "_", sexe_code)
@@ -211,11 +240,11 @@ mortalite_combine <- bind_rows(mortalite_cause, mortalite_perinatale_comb) %>% s
 # Table a part pour mortalité périnatale
 mortalite_perinatale <- mortalite_perinatale_comb %>% select(-variable)
 
-saveRDS(mortalite_combine, "donnees_traitees/mortalite_combine.rds")
-saveRDS(mortalite_perinatale, "donnees_traitees/mortalite_perinatale.rds")
-saveRDS(mortalite_cause, "donnees_traitees/mortalite_cause.rds")
-saveRDS(morta_dip, "donnees_traitees/morta_dip.rds")
-saveRDS(morta_cs, "donnees_traitees/morta_cs.rds")
+saveRDS(mortalite_combine, fileoutput_morta_combine)
+saveRDS(mortalite_perinatale, fileoutput_morta_peri)
+saveRDS(mortalite_cause, fileoutput_morta_cause)
+saveRDS(morta_dip, fileoutput_morta_dip)
+saveRDS(morta_cs, fileoutput_morta_cs)
 
 
 ## Import et prétraitement des données de Cindy ---------------------------------
@@ -251,5 +280,5 @@ regions_apl <- communes_avec_geo %>%
 
 # Sauvegarder les données (format .rds)
 saveRDS(list(communes = communes_avec_geo, regions = regions_apl),
-  file = "donnees_traitees/donnees_propres_apl_generalistes.rds"
+  file = fileoutput_apl_gener
 )

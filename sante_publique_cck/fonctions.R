@@ -134,7 +134,7 @@ import_all_sheets <- function(file) {
 #'
 charger_apl_medecin_annee <- function(annee) {
   df <- read_excel(
-    "data/Indicateur d'accessibilité potentielle localisée (APL) aux médecins généralistes.xlsx",
+    fileinput_apl_gener,
     sheet = paste0("APL ", annee), skip = 8
   ) %>%
     slice(-1) %>%
