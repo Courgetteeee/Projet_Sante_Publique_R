@@ -48,12 +48,10 @@ regions_apl_gener <- donnees_apl_generalistes$regions
 # ---------------------------- UI -----------------------------------
 
 
-# Define UI for application that draws a histogram
 ui <- navbarPage(
   "Santé publique sur le territoire",
   theme = shinytheme("flatly"),
   
-  # Titre onglet interractif
   tags$head(
     tags$style(HTML("
                     .navbar-default .navbar-nav > li > a:hover, .nav-tabs > li > a:hover{
@@ -241,7 +239,6 @@ ui <- navbarPage(
                     " Accessibilité aux médecins généralistes (APL)"
     ),
     
-    #Selection de l'année global en haut
     fluidRow(
       column(
         width = 3,
@@ -256,7 +253,7 @@ ui <- navbarPage(
       )
     ),
     
-    #Info sur l'apl / Définition
+    #Info sur l'apl
     fluidRow(
       column(12,
              div(
@@ -291,7 +288,6 @@ ui <- navbarPage(
                    selected = "Bourgogne-Franche-Comté"
                  ),
                  
-                 #Bouton dowload
                  downloadButton("download_carte_region", "Télécharger la carte",
                                 style = "background-color: #667eea; border:none;margin-bottom: 20px;"),
                  
@@ -356,7 +352,6 @@ ui <- navbarPage(
       
       #Onglet 2 : France entière
       tabPanel(
-        #Titre de l'onglet
         "Carte de France",
         br(),
         
@@ -740,19 +735,14 @@ server <- function(input, output) {
     ###### Carte France entière
     output$carte_france_gener <- renderLeaflet({
       
-      #Filtrer les données
       region_data <- regions_filtre_apl_gener()
-      #Palette de couleurs
       pal <- colorNumeric(palette = "magma", domain = region_data$apl_moyen, reverse=FALSE)
-      #Calcul la bounding box (pour centrer la carte)
       b <- st_bbox(region_data)
       
       #Création de la carte
       leaflet(region_data) %>%
-        #Centrer la carte
         setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
                 zoom = 6) %>%
-        #Ajout des polygones des régions avec couleurs
         addPolygons( fillColor = ~pal(apl_moyen), weight = 1 ,color = "white", fillOpacity = 0.8,
                      label = ~paste0(reg_name, " : APL ", round(apl_moyen, 2)) %>%
                        lapply(htmltools::HTML)) %>%
@@ -828,20 +818,15 @@ server <- function(input, output) {
       #Filtrer les données
       toutes_regions <- regions_filtre_apl_gener()
       region_filtree <- communes_filtre_apl_gener2() %>% filter(reg_name == input$region_choisie)
-      #Palette de couleurs
       pal <- colorNumeric(palette = "magma", domain= region_filtree$apl_generalistes, reverse=FALSE)
-      #Calcul la bounding box (pour centrer la carte)
       b <- st_bbox(region_filtree)
       
       #Création de la carte
       leaflet() %>%
-        #Centrer la carte
         setView(lng = mean(c(b["xmin"], b["xmax"])), lat = mean(c(b["ymin"], b["ymax"])),
                 zoom = 8) %>%
-        #Ajouter un fond grisé avec toutes les régions
         addPolygons( data = toutes_regions, fillColor = "#f0f0f1", weight = 1, color="#999",
                      fillOpacity = 0.3) %>%
-        #Ajout des polygones des régions avec couleurs
         addPolygons( data = region_filtree, fillColor = ~pal(apl_generalistes), weight = 0.5,color = "white",
                      fillOpacity = 0.9,
                      label = ~paste0(com_name, " : APL ", round(apl_generalistes, 2)) %>% lapply(htmltools::HTML)) %>%
@@ -873,7 +858,6 @@ server <- function(input, output) {
       
       #Trouver le rang
       region_info <- toutes_regions %>% filter(reg_name==input$region_choisie)
-      #Si pb information
       if (nrow(region_info)==0){
         return("Aucune données disponible pour cette région.")
       }

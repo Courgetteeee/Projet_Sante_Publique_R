@@ -168,7 +168,6 @@ header1 <- fill(data.frame(header1), header1)$header1
 
 sexe_code <- headers[2, ] %>% unlist() # H ou F
 
-# Lecture des données en sautant les 2 premières lignes
 dat <- read_excel("data/FET2021-28.xlsx", skip = 2, col_names = FALSE)
 
 # Création des noms uniques
@@ -208,7 +207,6 @@ mortalite_perinatale_comb <- dat %>%
     variable = str_remove(variable_sexe, "_Ensemble")
   )
 
-# Combine les deux
 mortalite_combine <- bind_rows(mortalite_cause, mortalite_perinatale_comb) %>% select(-variable_sexe)
 # Table a part pour mortalité périnatale
 mortalite_perinatale <- mortalite_perinatale_comb %>% select(-variable)
@@ -222,15 +220,13 @@ saveRDS(morta_cs, "donnees_traitees/morta_cs.rds")
 
 ## Import et prétraitement des données de Cindy ---------------------------------
 
-# chargement données par années
 df_communes_2022 <- charger_apl_medecin_annee(2022)
 df_communes_2023 <- charger_apl_medecin_annee(2023)
-# Combine des deux années
+
 df_communes <- bind_rows(df_communes_2022, df_communes_2023)
 
 
 # Chargement données
-# quiet = TRUE : pas d'affichage
 communes_geo <- st_read(
   "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune/exports/geojson",
   quiet = TRUE
@@ -238,13 +234,11 @@ communes_geo <- st_read(
   mutate(code_commune = as.character(com_code))
 
 
-# Fusion de commune et nos données par code_commune
 communes_avec_geo <- communes_geo %>%
   left_join(df_communes, by = "code_commune") %>%
   filter(!substr(code_commune, 1, 2) %in% c("97", "98"))
 
 
-# Regroupe les communes par région
 regions_apl <- communes_avec_geo %>%
   group_by(reg_code, reg_name, annee) %>%
   summarise(
